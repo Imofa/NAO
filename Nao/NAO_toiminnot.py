@@ -1,4 +1,7 @@
-#import naoqi 
+#import naoqi
+RobottiNimi= ""
+RobottiIP= ""
+RobottiPort= ""
 
 def testNaoYhteys():
     palaute = "Y"

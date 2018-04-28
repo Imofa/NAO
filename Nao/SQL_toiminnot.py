@@ -124,25 +124,97 @@ def tuoRobotit():
                 break
             else:
                 row=row[-1]
-                robottitaLaajuus.append(row)
+                robottiLaajuus.append(row)
         index = 0
-        for i in range(len(tietokantaLaajuus)):
+        for i in range(len(robottiLaajuus)):
             tuoRobotti(index)
             index = index+1
     except:
         yhteys.rollback()
-        messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoTietokanta")
+        messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoRobotit")
 
 def tuoRobotti(index):
-    sql = ("SELECT nimi FROM nao_robotti WHERE nro = {0}").format(tietokantaLaajuus[index])
+    sql = ("SELECT nimi FROM nao_robotti WHERE nro = {0}").format(robottiLaajuus[index])
     try:
         cursor.execute(sql)
         tieto = cursor.fetchone()
-        tieto = tieto[-1]
-        tietokantaToimintoTiedot.append(tieto)
+        tieto = tieto
+        robottiTiedot.append(tieto)
     except:
         yhteys.rollback()
         messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoTieto")
+
+def tallennaRobotti(nimi, kuvaus, ip, portti):
+    if len(nimi) > 0 and len(ip) > 0 and len(portti) > 0:
+        sql = ("INSERT INTO nao_robotti (nimi, kuvaus, ip, port) VALUES ('{0}', '{1}', '{2}', '{3}')").format(nimi, kuvaus, ip, portti)
+        print(sql)
+        try:
+            cursor.execute(sql)
+            messagebox.showinfo("ONNISTUI", "Uusi Robotti tallennettu onnistuneesti")
+        except:
+            yhteys.rollback()
+            messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tallennaRobotti")
+    else:
+        messagebox.showerror("VIRHE","Tarkista nimi, ip ja portti")
+
+def tuoRobottiKuvaus(value):
+    sql = ("SELECT kuvaus FROM nao_robotti WHERE nimi = '{0}'").format(value)
+    try:
+        cursor.execute(sql)
+        kuvaus = cursor.fetchone()
+        kuvaus = kuvaus[-1]
+        return kuvaus
+    except:
+        yhteys.rollback()
+        messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoRobottiKuvaus")
+
+def tuoRobottiIp(value):
+    sql = ("SELECT ip FROM nao_robotti WHERE nimi = '{0}'").format(value)
+    try:
+        cursor.execute(sql)
+        ip = cursor.fetchone()
+        ip = ip[-1]
+        return ip
+    except:
+        yhteys.rollback()
+        messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoRobottiIp")
+
+def tuoRobottiPortti(value):
+    sql = ("SELECT port FROM nao_robotti WHERE nimi = '{0}'").format(value)
+    try:
+        cursor.execute(sql)
+        portti = cursor.fetchone()
+        portti = portti[-1]
+        return portti
+    except:
+        yhteys.rollback()
+        messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoRobottiPortti")
+
+def poistaRobotti(value):
+    vastaus=messagebox.askquestion("Poista robotti", "Oletko varma?\n Tätä toimintoa ei voi peruuttaa")
+    if vastaus == 'yes':
+        sql = ("DELETE FROM nao_robotti WHERE nimi = '{0}'").format(value)
+        try:
+            cursor.execute(sql)
+            messagebox.showinfo("Onnistui", "Tapahtuma suoritettu onnistuneesti")
+        except:
+            yhteys.rollback()
+            messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:PoistaToiminto")
+    else:
+        pass
+
+def paivitaRobotti(nimi, kuvaus, ip, portti):
+    vastaus=messagebox.askquestion("Päivitä robotin tiedot", "Oletko varma?\n Tätä toimintoa ei voi peruuttaa")
+    if vastaus == 'yes':
+        sql = ("UPDATE nao_robotti SET kuvaus = '{1}', ip = '{2}', port = '{3}' WHERE nimi = '{0}'").format(nimi, kuvaus, ip, portti)
+        try:
+            cursor.execute(sql)
+            messagebox.showinfo("Onnistui", "Koodin tallennus suoritettu onnistuneesti")
+        except:
+            yhteys.rollback()
+            messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:paivitaRobotti")
+    else:
+        pass
 
 #def vieTietoja(a):
 #	sql = ("INSERT INTO {0}(halutut tiedot) VALUES(halutut tiedot)").format(a)

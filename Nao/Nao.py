@@ -13,7 +13,7 @@ Robotit=["Robotti_01", "Robotti_02", "Robotti_03", "Robotti_04"]
 
 class Gui():
     def __init__(s):
-        s.__muokkaustila = 0
+        s.__muokkaustila = 0    #Muuttuja joka tallentaa onko muokkaustila päällä vai pois
         s.__root = Tk()
         s.__root.resizable(0,0)
         s.__root.title("NAO tietokanta\t by:Roope Romu")
@@ -37,8 +37,8 @@ class Gui():
         s.__valikkoHelp.add_command(label="Toiminnot", command=lambda: print())
         s.__valikkoHelp.add_command(label="Tietoja", command=lambda: print())
         #valikkoRobotti objektit
-        s.__valikkoRobotti.add_command(label="Valitse NAO", command=lambda: s.ValitseNao())
-        s.__valikkoRobotti.add_command(label="Yhdistä NAO")
+        s.__valikkoRobotti.add_command(label="Lisää NAO", command=lambda: s.lisaaNao())
+        s.__valikkoRobotti.add_command(label="Valitse NAO", command=lambda: s.valitseNao())
 
         """
         Ohjelman pää ikkuna jossa kaikki taika tapahtuu
@@ -46,14 +46,6 @@ class Gui():
         s.__paaIkkuna=Frame(s.__root).grid(row=0, column=0, sticky='nsew')
         s.__paaIkkunaVasenSelite=Label(s.__paaIkkuna, text="", relief=GROOVE).grid(row=0, column=0, sticky='nsew')
         s.__paaIkkunaOikeaSelite=Label(s.__paaIkkuna, text="Käsiteltävä koodi", relief=GROOVE).grid(row=0, column=1, sticky='nsew')
-       
-        #"""
-        #Popup ikkuna ohjelman eri toiminnoille
-        #"""
-        #s.popUpIkkuna = Menu(s.__root, tearoff=0)
-        #s.popUpIkkuna.add_command(label="Print object", )
-        #s.popUpIkkuna.add_command(label="Unlock")
-        #s.popUpIkkuna.add_command(label="Modify")
 
         #paaIkkunaVasen ruudun vasemmanpuoliset objektit
         s.__paaIkkunaVasen=Frame(s.__paaIkkuna)
@@ -69,10 +61,7 @@ class Gui():
         s.__paaIkkunaLista=Listbox(s.__paaIkkunaVasen, width=30, height=30)
         s.__paaIkkunaLista.config(exportselection=False)
         s.__paaIkkunaLista.bind("<<ListboxSelect>>", s.ListboxValinta)
-        #s.__paaIkkunaLista.bind("<Button-3>", s.popup)
         s.__paaIkkunaLista.grid(row=2, column=0, sticky=E+W, pady=1, padx=1)
-
-        #s.__paaIkkunaLista.bind('<<ListboxSelect>>', s.ValittuToiminto)
         for toiminto in SQL.tietokantaToimintoTiedot:
             s.__paaIkkunaLista.insert('end', toiminto)
 
@@ -84,7 +73,7 @@ class Gui():
         s.__paaikkunaOikeaMuokkaustila=Label(s.__paaIkkunaOikea, text="Muokkaustila:").grid(row=0, column=2, sticky=E)
         s.__paaIkkunaOikeaMuokkaa=Button(s.__paaIkkunaOikea, text="Päällä", command=lambda: s.Muokkaa(), width=8) #Mahdollista muokkaus texti kenttiin
         s.__paaIkkunaOikeaMuokkaa.grid(row=0, column=3, sticky=W)
-        s.__paaIkkunaKoodi=Text(s.__paaIkkunaOikea, width=80, height=50, wrap=WORD, state=DISABLED, bg="grey95")
+        s.__paaIkkunaKoodi=Text(s.__paaIkkunaOikea, width=80, height=40, wrap=WORD, state=DISABLED, bg="grey95")
         s.__paaIkkunaKoodi.grid(row=1, column=0, rowspan=2, columnspan=4, pady=1, padx=1)
         s.__scrollbar=Scrollbar(s.__paaIkkunaOikea, command=s.__paaIkkunaKoodi.yview)
         s.__scrollbar.grid(row=1, column=5, rowspan=2, sticky='ns')
@@ -101,8 +90,14 @@ class Gui():
         s.__alapalkki.grid(row=10, columnspan=10, sticky=E+W, padx=1)
         s.__alapalkkiYhdistetty=Label(s.__alapalkki, text="", width=2, background="lightgrey", anchor=W)
         s.__alapalkkiYhdistetty.grid(row=0, column=0)
-        s.__alapalkkiKello=Label(s.__alapalkki, text="", background="Lightgrey", anchor=E, width=90)
-        s.__alapalkkiKello.grid(row=0, column=1)
+        s.__alapalkkiRobotti=Label(s.__alapalkki, text="", background="lightgrey", width=15, anchor=E)
+        s.__alapalkkiRobotti.grid(row=0, column=1, sticky=E)
+        s.__alapalkkiRobottiIP=Label(s.__alapalkki, text="", background="lightgrey", width=10, anchor=CENTER)
+        s.__alapalkkiRobottiIP.grid(row=0, column=2, sticky=W)
+        s.__alapalkkiRobottiPort=Label(s.__alapalkki, text="", background="lightgrey", width=5, anchor=W)
+        s.__alapalkkiRobottiPort.grid(row=0, column=3, sticky=W)
+        s.__alapalkkiKello=Label(s.__alapalkki, text="", background="Lightgrey", width=85, anchor=E)
+        s.__alapalkkiKello.grid(row=0, column=5, columnspan=10)
 
         s.__root.config(menu=s.__valikkoPalkki)
         s.Kello()
@@ -170,6 +165,7 @@ class Gui():
 
     def UusiToiminto(s):
         s.__uusiToimintoIkkuna=Toplevel()
+        s.__uusiToimintoIkkuna.attributes("-topmost", True)
         s.__uusiToimintoIkkuna.title("Lisää uusi toiminto")
         s.__toiminnonNimiLab=Label(s.__uusiToimintoIkkuna, text="Toiminnon nimi:", width=15).grid(row=1, column=0, sticky=E)
         s.__toiminnonKuvausLab=Label(s.__uusiToimintoIkkuna, text="Toiminnon kuvaus:", width=15).grid(row=2, column=0, sticky=E)
@@ -222,42 +218,121 @@ class Gui():
             s.__paaIkkunaKoodi.config(state=DISABLED, bg="grey95")
             s.__paaikkunaOikeaTallenna.config(state=DISABLED)
             s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
-            s.__muokkaustila = 0
+            s.__muokkaustila = 0 #MUOKKAUSTILAN koodi
     
-    def ValitseNao(s):
-        s.__RobottiVar=StringVar()
-        s.__RobottiVar.set(Robotit[0])
-
+    def lisaaNao(s):
         s.__ValitseNaoIkkuna=Toplevel()
-        s.__ValitseNaoIkkuna.title("Valitse Robotti")
-        s.__valitseNaoListalta=Label(s.__ValitseNaoIkkuna, text="Valitse robotti", width=15).grid(row=0, column=0, sticky=E)
-        s.__valitseNaoTai=Label(s.__ValitseNaoIkkuna, text="TAI LISÄÄ UUSI ROBOTTI").grid(row=1, column=0, columnspan=3)
+        s.__ValitseNaoIkkuna.attributes("-topmost", True)
+        s.__ValitseNaoIkkuna.title("Lisää robotti")
+        s.__ValitseNaoIkkuna.resizable(0,0)
         s.__valitseNaoNimiLab=Label(s.__ValitseNaoIkkuna, text="Robotin nimi:", width=15).grid(row=2, column=0, sticky=E)
         s.__valitseNaoKuvausLab=Label(s.__ValitseNaoIkkuna, text="Robotin kuvaus:", width=15).grid(row=3, column=0, sticky=E)
         s.__valitseNaoIpLab=Label(s.__ValitseNaoIkkuna, text="Robotin IP:", width=15).grid(row=4, column=0, sticky=E)
         s.__valitseNaoPortLab=Label(s.__ValitseNaoIkkuna, text="Portti", width=15).grid(row=5, column=0, sticky=E)
-        #Dropdown listaus tallennetuista roboteista
-        s.__RobottiLista=OptionMenu(s.__ValitseNaoIkkuna, s.__RobottiVar, *Robotit)
-        s.__RobottiLista.config(width=30)
-        s.__RobottiLista.grid(row=0, column=1, columnspan=2, sticky=W+E)
         #Entrykentät
         s.__valitseNaoNimiEnt=Entry(s.__ValitseNaoIkkuna)
         s.__valitseNaoNimiEnt.grid(row=2, column=1, columnspan=2, sticky=W+E)
-        s.__valitseNaoKuvausEnt=Entry(s.__ValitseNaoIkkuna, width=30)
+        s.__valitseNaoKuvausEnt=Text(s.__ValitseNaoIkkuna, width=30, height=3, wrap=WORD)
         s.__valitseNaoKuvausEnt.grid(row=3, column=1, columnspan=2, sticky=W+E)
         s.__valitseNaoIpEnt=Entry(s.__ValitseNaoIkkuna, width=30)
         s.__valitseNaoIpEnt.grid(row=4, column=1, columnspan=2, sticky=W+E)
         s.__valitseNaoPortEnt=Entry(s.__ValitseNaoIkkuna, width=30)
         s.__valitseNaoPortEnt.grid(row=5, column=1, columnspan=2, sticky=W+E)
-        s.__toiminnonTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: print(
-                        Nimi=s.__valitseNaoNimiEnt.get(),
-                        kuvaus=s.__valitseNaoKuvausEnt.get(),
+        s.__toiminnonTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: SQL.tallennaRobotti(
+                        nimi=s.__valitseNaoNimiEnt.get(),
+                        kuvaus=s.__valitseNaoKuvausEnt.get("0.0", END),
                         ip=s.__valitseNaoIpEnt.get(),
-                        portti=s.__valitseNaoPortEnt()))
+                        portti=s.__valitseNaoPortEnt.get()))
         s.__toiminnonTallennaPainike.grid(row=6, column=1, sticky=E, pady=1)
         s.__toiminnonPeruutaPainike=Button(s.__ValitseNaoIkkuna, text="Peruuta", command=lambda: s.__ValitseNaoIkkuna.destroy())
         s.__toiminnonPeruutaPainike.grid(row=6, column=2, sticky=W, padx=2)
+    def valitseNao(s):
+        s.__ValitseNaoIkkuna=Toplevel()
+        s.__ValitseNaoIkkuna.attributes("-topmost", True)
+        s.__ValitseNaoIkkuna.title("Valitse robotti")
+        s.__ValitseNaoIkkuna.resizable(0,0)
 
+        s.__ValitseNaoLista=Listbox(s.__ValitseNaoIkkuna, height=6)
+        s.__ValitseNaoLista.config(exportselection=False)
+        s.__ValitseNaoLista.bind("<<ListboxSelect>>", s.NaoListboxValinta)
+        s.__ValitseNaoLista.grid(row=2, column=0, rowspan=4, sticky=E+W+S+N, pady=1, padx=1)
+        for robotti in SQL.robottiTiedot:
+            s.__ValitseNaoLista.insert('end', robotti)
+        s.__valitseNaoNimiLab=Label(s.__ValitseNaoIkkuna, text="Robotin nimi:", width=15).grid(row=2, column=1, sticky=E)
+        s.__valitseNaoKuvausLab=Label(s.__ValitseNaoIkkuna, text="Robotin kuvaus:", width=15).grid(row=3, column=1, sticky=E)
+        s.__valitseNaoIpLab=Label(s.__ValitseNaoIkkuna, text="Robotin IP:", width=15).grid(row=4, column=1, sticky=E)
+        s.__valitseNaoPortLab=Label(s.__ValitseNaoIkkuna, text="Portti", width=15).grid(row=5, column=1, sticky=E)
+        #Entrykentät
+        s.__valitseNaoNimiEnt=Entry(s.__ValitseNaoIkkuna)
+        s.__valitseNaoNimiEnt.grid(row=2, column=2, columnspan=3, sticky=W+E, padx=1)
+        s.__valitseNaoKuvausEnt=Text(s.__ValitseNaoIkkuna, width=30, height=3, wrap=WORD)
+        s.__valitseNaoKuvausEnt.grid(row=3, column=2, columnspan=3, sticky=W+E, padx=1)
+        s.__valitseNaoIpEnt=Entry(s.__ValitseNaoIkkuna, width=30)
+        s.__valitseNaoIpEnt.grid(row=4, column=2, columnspan=3, sticky=W+E, padx=1)
+        s.__valitseNaoPortEnt=Entry(s.__ValitseNaoIkkuna, width=30)
+        s.__valitseNaoPortEnt.grid(row=5, column=2, columnspan=3, sticky=W+E, padx=1)
+        s.__toiminnonPoistaPainike=Button(s.__ValitseNaoIkkuna, text="Poista", command=lambda: s.PoistaNao())
+        s.__toiminnonPoistaPainike.grid(row=6, column=0, sticky=W+E)
+        s.__toiminnonValitsePainike=Button(s.__ValitseNaoIkkuna, text="Valitse", command=lambda: s.ValitseNao(
+                        nimi=s.__valitseNaoNimiEnt.get(),
+                        ip=s.__valitseNaoIpEnt.get(),
+                        portti=s.__valitseNaoPortEnt.get()))
+        s.__toiminnonValitsePainike.grid(row=6, column=2, sticky=W+E)
+        s.__toiminnonTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: SQL.paivitaRobotti(
+                        nimi=s.__valitseNaoNimiEnt.get(),
+                        kuvaus=s.__valitseNaoKuvausEnt.get("0.0", END),
+                        ip=s.__valitseNaoIpEnt.get(),
+                        portti=s.__valitseNaoPortEnt.get()))
+        s.__toiminnonTallennaPainike.grid(row=6, column=3, sticky=W+E, pady=1)
+        s.__toiminnonPeruutaPainike=Button(s.__ValitseNaoIkkuna, text="Peruuta", command=lambda: s.__ValitseNaoIkkuna.destroy())
+        s.__toiminnonPeruutaPainike.grid(row=6, column=4, sticky=W+E, padx=2)
+        s.PaivitaNao()
+    def PoistaNao(s):
+        value=s.__valitseNaoNimiEnt.get()
+        SQL.poistaRobotti(value)
+        s.PaivitaNao()
+    def PaivitaNao(s):
+        s.__ValitseNaoLista.delete(0, END)
+        SQL.robottiLaajuus.clear()
+        SQL.robottiTiedot.clear()
+        SQL.tuoRobotit()
+        for robotti in SQL.robottiTiedot:
+            s.__ValitseNaoLista.insert('end', robotti)
+    def NaoListboxValinta(s, event):
+        widget = event.widget
+        selection=widget.curselection()
+        value = widget.get(selection)
+        s.__valitseNaoNimiEnt.delete(0, END)
+        s.__valitseNaoNimiEnt.insert(0, value)
+        s.__valitseNaoKuvausEnt.delete('1.0', END)
+        s.__valitseNaoKuvausEnt.insert('1.0', SQL.tuoRobottiKuvaus(value[-1]))
+        s.__valitseNaoIpEnt.delete(0, END)
+        s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value[-1]))
+        s.__valitseNaoPortEnt.delete(0, END)
+        s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
+    def ValitseNao(s, nimi, ip, portti):
+        NAO.RobottiNimi= nimi
+        NAO.RobottiIP= ip
+        NAO.RobottiPort= portti
+        s.__alapalkkiRobotti.config(text=NAO.RobottiNimi)
+        s.__alapalkkiRobottiIP.config(text=NAO.RobottiIP)
+        s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
+        s.__ValitseNaoIkkuna.destroy()
+
+
+
+        #s.__valitseNaoListalta=Label(s.__ValitseNaoIkkuna, text="Valitse robotti", width=15).grid(row=0, column=0, sticky=E)
+        #s.__valitseNaoTai=Label(s.__ValitseNaoIkkuna, text="TAI LISÄÄ UUSI ROBOTTI").grid(row=1, column=0, columnspan=3)
+
+        #SQL.tuoRobotit()
+        #print(SQL.robottiTiedot)
+        #s.__RobottiVar=StringVar()
+        #s.__RobottiVar.set("UUSI")
+
+        #Dropdown listaus tallennetuista roboteista
+        #s.__RobottiLista=OptionMenu(s.__ValitseNaoIkkuna, s.__RobottiVar, *SQL.robottiTiedot)
+        #s.__RobottiLista.config(width=30)
+        #s.__RobottiLista.grid(row=0, column=1, columnspan=2, sticky=W+E)
 
     #def popup(s,event):
     #    widget = event.widget
@@ -273,5 +348,6 @@ class Gui():
 
 def main():
     SQL.tuoTietokanta()
+    SQL.tuoRobotit()
     Gui()
 main()
