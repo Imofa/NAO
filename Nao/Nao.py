@@ -101,7 +101,6 @@ class Gui():
 
         s.__root.config(menu=s.__valikkoPalkki)
         s.Kello()
-        s.Yhdistetty()
         s.__root.mainloop()
         """
         Varmistetaan ohjelman sammuminen
@@ -123,17 +122,17 @@ class Gui():
             s.__alapalkkiYhdistetty.configure(text="(Y)", fg="green")
             s.__paaIkkunaOikeaSuorita.configure(state=NORMAL)
             s.__paaIkkunaOikeaLaheta.configure(state=NORMAL)
-            s.__root.after(5000, s.Yhdistetty)
+            s.__root.after(10000, s.Yhdistetty)
         elif X == "N":
             s.__alapalkkiYhdistetty.configure(text="(N)", fg="red")
             s.__paaIkkunaOikeaSuorita.configure(state=DISABLED)
             s.__paaIkkunaOikeaLaheta.configure(state=DISABLED)
-            s.__root.after(5000, s.Yhdistetty)
+            s.__root.after(10000, s.Yhdistetty)
         else:
             s.__alapalkkiYhdistetty.configure(text="(C)", fg="yellow")
             s.__paaIkkunaOikeaSuorita.configure(state=DISABLED)
             s.__paaIkkunaOikeaLaheta.configure(state=DISABLED)
-            s.__root.after(5000, s.Yhdistetty)
+            s.__root.after(10000, s.Yhdistetty)
 
     def PaivitaOrja(s):
         s.__paaIkkunaLista.delete(0, END)
@@ -317,6 +316,7 @@ class Gui():
         s.__alapalkkiRobotti.config(text=NAO.RobottiNimi)
         s.__alapalkkiRobottiIP.config(text=NAO.RobottiIP)
         s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
+        s.Yhdistetty()
         s.__ValitseNaoIkkuna.destroy()
 
 
