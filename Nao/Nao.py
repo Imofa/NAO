@@ -26,16 +26,16 @@ class Gui():
         s.__valikkoPalkki.add_cascade(label="File", menu=s.__valikkoFile)
         s.__valikkoRobotti=Menu(s.__valikkoPalkki, tearoff=0)
         s.__valikkoPalkki.add_cascade(label="NAO", menu=s.__valikkoRobotti)
-        s.__valikkoHelp=Menu(s.__valikkoPalkki, tearoff=0)
-        s.__valikkoPalkki.add_cascade(label="Help", menu=s.__valikkoHelp)
+        #s.__valikkoHelp=Menu(s.__valikkoPalkki, tearoff=0)
+        #s.__valikkoPalkki.add_cascade(label="Help", menu=s.__valikkoHelp)
         #valikkoFile objektit
         s.__valikkoFile.add_command(label="Päivitä", command=lambda: s.PaivitaOrja())
-        s.__valikkoFile.add_command(label="Yhdistä", state=DISABLED, command=lambda: print())
+        s.__valikkoFile.add_command(label="Yhdistä", command=lambda: s.Yhdistetty())
         s.__valikkoFile.add_separator()
         s.__valikkoFile.add_command(label="Lopeta", command=lambda: s.__root.destroy())
         #valikkoHelp objektit
-        s.__valikkoHelp.add_command(label="Toiminnot", command=lambda: print())
-        s.__valikkoHelp.add_command(label="Tietoja", command=lambda: print())
+        #s.__valikkoHelp.add_command(label="Toiminnot", command=lambda: print())
+        #s.__valikkoHelp.add_command(label="Tietoja", command=lambda: print())
         #valikkoRobotti objektit
         s.__valikkoRobotti.add_command(label="Lisää NAO", command=lambda: s.lisaaNao())
         s.__valikkoRobotti.add_command(label="Valitse NAO", command=lambda: s.valitseNao())
@@ -58,7 +58,7 @@ class Gui():
         s.__paaIkkunaOrjaPaivita=Button(s.__paaIkkunaOrja, text="Päivitä", command=lambda: s.PaivitaOrja()).grid(row=1, column=1, sticky=E+W)
         s.__paaIkkunaOrjaPoista=Button(s.__paaIkkunaOrja, text="Poista", command=lambda: s.PoistaToiminto(), state=DISABLED)
         s.__paaIkkunaOrjaPoista.grid(row=1, column=2, sticky=E+W)
-        s.__paaIkkunaLista=Listbox(s.__paaIkkunaVasen, width=30, height=30)
+        s.__paaIkkunaLista=Listbox(s.__paaIkkunaVasen, width=30, height=25)
         s.__paaIkkunaLista.config(exportselection=False)
         s.__paaIkkunaLista.bind("<<ListboxSelect>>", s.ListboxValinta)
         s.__paaIkkunaLista.grid(row=2, column=0, sticky=E+W, pady=1, padx=1)
@@ -101,6 +101,7 @@ class Gui():
 
         s.__root.config(menu=s.__valikkoPalkki)
         s.Kello()
+        s.Yhdistetty()
         s.__root.mainloop()
         """
         Varmistetaan ohjelman sammuminen
@@ -191,9 +192,10 @@ class Gui():
         s.PaivitaOrja()
         s.__uusiToimintoIkkuna.destroy()
         
-
     def PoistaToiminto(s):
         toiminto=s.__paaIkkunaLista.get(s.__paaIkkunaLista.curselection())
+        s.__paaIkkunaKoodi.delete('1.0', END)
+        s.__paaIkkunaOrjaKuvaus.delete('1.0', END)
         SQL.poistaToiminto(toiminto)
         s.PaivitaOrja()
 
@@ -310,13 +312,13 @@ class Gui():
         s.__valitseNaoPortEnt.delete(0, END)
         s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
     def ValitseNao(s, nimi, ip, portti):
-        NAO.RobottiNimi= nimi
-        NAO.RobottiIP= ip
-        NAO.RobottiPort= portti
+        s.__alapalkkiYhdistetty.configure(text="(C)", fg="yellow")
+        NAO.RobottiNimi=nimi
+        NAO.RobottiIP=ip
+        NAO.RobottiPort=portti
         s.__alapalkkiRobotti.config(text=NAO.RobottiNimi)
         s.__alapalkkiRobottiIP.config(text=NAO.RobottiIP)
         s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
-        s.Yhdistetty()
         s.__ValitseNaoIkkuna.destroy()
 
 

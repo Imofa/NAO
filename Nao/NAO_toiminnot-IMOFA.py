@@ -2,10 +2,9 @@ import os
 import subprocess
 
 #import naoqi
-RobottiNimi=""
-RobottiIP=""
-RobottiPort=""
-vastaus=""
+RobottiNimi=None
+RobottiIP=None
+RobottiPort=None
 
 def testNaoYhteys():
     with open(os.devnull, 'w') as DEVNULL:
@@ -15,20 +14,16 @@ def testNaoYhteys():
                 stdout=DEVNULL,  # suppress output
                 stderr=DEVNULL
             )
-            if vastaus == 0:
-                palaute = "Y"
-                return palaute
-            elif vastaus == 1:
-                palaute = "N"
-                return palaute
-            else:
-                palaute = "C"
-                return palaute
-
-            print(vastaus)
             is_up = True
         except subprocess.CalledProcessError:
             is_up = False
-            palaute = "N"
-            return palaute
+    if vastaus == 0:
+        palaute = "Y"
+        return palaute
+    elif vastaus == 1:
+        palaute = "N"
+        return palaute
+    else:
+        palaute = "C"
+        return palaute
 
