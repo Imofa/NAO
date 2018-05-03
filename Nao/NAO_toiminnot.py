@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 import os
 import subprocess
 
@@ -31,4 +33,7 @@ def testNaoYhteys():
             is_up = False
             palaute = "N"
             return palaute
+
+
+
 
