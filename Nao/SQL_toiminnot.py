@@ -75,6 +75,7 @@ def tuoKoodi(value):
         cursor.execute(sql)
         koodi = cursor.fetchone()
         koodi = koodi[-1]
+        koodi = str.replace(koodi, "HEITTOMERKKI", "'")
         return koodi
     except:
         yhteys.rollback()
@@ -82,7 +83,9 @@ def tuoKoodi(value):
 
 def uusiToiminto(toiminto, kuvaus, koodi):
     if len(toiminto) > 0:
+        koodi = str.replace(koodi, "'", "HEITTOMERKKI")
         sql = ("INSERT INTO nao_tiedot(toiminto, kuvaus, koodi) VALUES('{0}','{1}','{2}')").format(toiminto,kuvaus,koodi)
+        print(sql)
         try:
             cursor.execute(sql)
         except:
@@ -107,7 +110,9 @@ def poistaToiminto(toiminto):
 def tallennaKoodi(koodi, kuvaus, toiminto):
     vastaus=messagebox.askquestion("Poista Toiminto", "Oletko varma?\n Tätä toimintoa ei voi peruuttaa")
     if vastaus == 'yes':
+        koodi = str.replace(koodi, "'", "HEITTOMERKKI")
         sql = ("UPDATE nao_tiedot SET koodi = '{0}', kuvaus = '{1}' WHERE toiminto= '{2}'").format(koodi, kuvaus, toiminto)
+        print(sql)
         try:
             cursor.execute(sql)
             messagebox.showinfo("Onnistui", "Koodin tallennus suoritettu onnistuneesti")
@@ -149,7 +154,6 @@ def tuoRobotti(index):
 def tallennaRobotti(nimi, kuvaus, ip, portti):
     if len(nimi) > 0 and len(ip) > 0 and len(portti) > 0:
         sql = ("INSERT INTO nao_robotti (nimi, kuvaus, ip, port) VALUES ('{0}', '{1}', '{2}', '{3}')").format(nimi, kuvaus, ip, portti)
-        print(sql)
         try:
             cursor.execute(sql)
             messagebox.showinfo("ONNISTUI", "Uusi Robotti tallennettu onnistuneesti")
@@ -218,8 +222,3 @@ def paivitaRobotti(nimi, kuvaus, ip, portti):
     else:
         pass
 
-#def vieTietoja(a):
-#	sql = ("INSERT INTO {0}(halutut tiedot) VALUES(halutut tiedot)").format(a)
-#
-#def poistaTietoja(a):
-#	sql=("DELETE FROM {0} WHERE {0}.{1} = '{2}'").format(a,a)

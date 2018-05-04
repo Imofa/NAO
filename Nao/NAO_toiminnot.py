@@ -34,6 +34,9 @@ def testNaoYhteys():
             palaute = "N"
             return palaute
 
+def suoritaToiminto(koodi):
+
+    pass
 
 
 

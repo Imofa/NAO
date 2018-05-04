@@ -11,8 +11,6 @@ from tkinter import TclError
 import NAO_toiminnot as NAO #Tuodaan NAO_toiminnot moduuli
 import SQL_toiminnot as SQL #Tuodaan SQL_toiminnot moduuli
 
-Robotit=["Robotti_01", "Robotti_02", "Robotti_03", "Robotti_04"]
-
 class Gui():
     def __init__(s):
         s.__muokkaustila = 0    #Muuttuja joka tallentaa onko muokkaustila päällä vai pois
@@ -23,21 +21,15 @@ class Gui():
         Ohjleman valikkopalkki
         """
         s.__valikkoPalkki=Menu(s.__root, relief=RAISED)
-        #s.__valikkoPalkki.config(background="lightgrey", activebackground="lightgrey")
         s.__valikkoFile=Menu(s.__valikkoPalkki, tearoff=0,)
         s.__valikkoPalkki.add_cascade(label="File", menu=s.__valikkoFile)
         s.__valikkoRobotti=Menu(s.__valikkoPalkki, tearoff=0)
         s.__valikkoPalkki.add_cascade(label="NAO", menu=s.__valikkoRobotti)
-        #s.__valikkoHelp=Menu(s.__valikkoPalkki, tearoff=0)
-        #s.__valikkoPalkki.add_cascade(label="Help", menu=s.__valikkoHelp)
         #valikkoFile objektit
         s.__valikkoFile.add_command(label="Päivitä", command=lambda: s.PaivitaOrja())
         s.__valikkoFile.add_command(label="Yhdistä", command=lambda: s.Yhdistetty())
         s.__valikkoFile.add_separator()
         s.__valikkoFile.add_command(label="Lopeta", command=lambda: s.__root.destroy())
-        #valikkoHelp objektit
-        #s.__valikkoHelp.add_command(label="Toiminnot", command=lambda: print())
-        #s.__valikkoHelp.add_command(label="Tietoja", command=lambda: print())
         #valikkoRobotti objektit
         s.__valikkoRobotti.add_command(label="Lisää NAO", command=lambda: s.lisaaNao())
         s.__valikkoRobotti.add_command(label="Valitse NAO", command=lambda: s.valitseNao())
@@ -162,6 +154,8 @@ class Gui():
         s.__paaIkkunaKoodi.config(state=DISABLED)
         s.__paaikkunaOikeaTallenna.config(state=DISABLED)
         s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
+        s.__paaIkkunaOrjaKuvaus.config(bg="grey95")
+        s.__paaIkkunaKoodi.config(bg="grey95")
         s.__muokkaustila = 0
 
 
@@ -323,29 +317,6 @@ class Gui():
         s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
         s.__ValitseNaoIkkuna.destroy()
 
-
-
-        #s.__valitseNaoListalta=Label(s.__ValitseNaoIkkuna, text="Valitse robotti", width=15).grid(row=0, column=0, sticky=E)
-        #s.__valitseNaoTai=Label(s.__ValitseNaoIkkuna, text="TAI LISÄÄ UUSI ROBOTTI").grid(row=1, column=0, columnspan=3)
-
-        #SQL.tuoRobotit()
-        #print(SQL.robottiTiedot)
-        #s.__RobottiVar=StringVar()
-        #s.__RobottiVar.set("UUSI")
-
-        #Dropdown listaus tallennetuista roboteista
-        #s.__RobottiLista=OptionMenu(s.__ValitseNaoIkkuna, s.__RobottiVar, *SQL.robottiTiedot)
-        #s.__RobottiLista.config(width=30)
-        #s.__RobottiLista.grid(row=0, column=1, columnspan=2, sticky=W+E)
-
-    #def popup(s,event):
-    #    widget = event.widget
-    #    selection=widget.curselection()
-    #    value = widget.get(selection)
-    #    try:
-    #        s.popUpIkkuna.post(event.x_root, event.y_root)
-    #    finally:
-    #        s.popUpIkkuna.grab_release()
 
 
 
