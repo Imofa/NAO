@@ -13,7 +13,7 @@ def testNaoYhteys():
     with open(os.devnull, 'w') as DEVNULL:
         try:
             vastaus = subprocess.check_call(
-                ['ping', '-n', '1', RobottiIP],
+                ['ping', '-n', '1', '-w', '200', RobottiIP],
                 stdout=DEVNULL,  # suppress output
                 stderr=DEVNULL
             )
@@ -26,8 +26,6 @@ def testNaoYhteys():
             else:
                 palaute = "C"
                 return palaute
-
-            print(vastaus)
             is_up = True
         except subprocess.CalledProcessError:
             is_up = False
@@ -35,7 +33,10 @@ def testNaoYhteys():
             return palaute
 
 def suoritaToiminto(koodi):
-
+    suorita = open("suorite.py", "w")
+    suorita.write(koodi)
+    suorita.close()
+    os.system("suorite.py")
     pass
 
 

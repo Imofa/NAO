@@ -72,7 +72,7 @@ class Gui():
         s.__scrollbar=Scrollbar(s.__paaIkkunaOikea, command=s.__paaIkkunaKoodi.yview)
         s.__scrollbar.grid(row=1, column=5, rowspan=2, sticky='ns')
         s.__paaIkkunaKoodi['yscrollcommand'] = s.__scrollbar.set
-        s.__paaIkkunaOikeaSuorita=Button(s.__paaIkkunaOikea, text="Suorita")      #Suorittaa koodin robotilla
+        s.__paaIkkunaOikeaSuorita=Button(s.__paaIkkunaOikea, text="Suorita", command=lambda: NAO.suoritaToiminto(koodi=s.__paaIkkunaKoodi.get("0.0", END)))      #Suorittaa koodin robotilla
         s.__paaIkkunaOikeaSuorita.grid(row=4, column=2, sticky=E)     
         s.__paaIkkunaOikeaLaheta=Button(s.__paaIkkunaOikea, text="Laheta")        #Lähettää koodin robotin muistiin
         s.__paaIkkunaOikeaLaheta.grid(row=4, column=3, sticky=W)
