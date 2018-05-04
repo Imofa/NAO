@@ -5,7 +5,7 @@ import subprocess
 
 #import naoqi
 RobottiNimi=""
-RobottiIP=""
+RobottiIP="0.0.0.0"
 RobottiPort=""
 vastaus=""
 
