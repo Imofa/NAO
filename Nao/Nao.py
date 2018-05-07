@@ -140,24 +140,26 @@ class Gui():
         pass
 
     def ListboxValinta(s, event):
-        widget = event.widget
-        selection=widget.curselection()
-        value = widget.get(selection)
-        s.__paaIkkunaOrjaPoista.config(state=NORMAL)
-        s.__paaIkkunaOrjaKuvaus.config(state=NORMAL)
-        s.__paaIkkunaKoodi.config(state=NORMAL)
-        s.__paaIkkunaOrjaKuvaus.delete('1.0', END)
-        s.__paaIkkunaOrjaKuvaus.insert('1.0', SQL.tuoToiminto(value))
-        s.__paaIkkunaKoodi.delete('1.0', END)
-        s.__paaIkkunaKoodi.insert('1.0', SQL.tuoKoodi(value))
-        s.__paaIkkunaOrjaKuvaus.config(state=DISABLED)
-        s.__paaIkkunaKoodi.config(state=DISABLED)
-        s.__paaikkunaOikeaTallenna.config(state=DISABLED)
-        s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
-        s.__paaIkkunaOrjaKuvaus.config(bg="grey95")
-        s.__paaIkkunaKoodi.config(bg="grey95")
-        s.__muokkaustila = 0
-
+        try:
+            widget = event.widget
+            selection=widget.curselection()
+            value = widget.get(selection)
+            s.__paaIkkunaOrjaPoista.config(state=NORMAL)
+            s.__paaIkkunaOrjaKuvaus.config(state=NORMAL)
+            s.__paaIkkunaKoodi.config(state=NORMAL)
+            s.__paaIkkunaOrjaKuvaus.delete('1.0', END)
+            s.__paaIkkunaOrjaKuvaus.insert('1.0', SQL.tuoToiminto(value))
+            s.__paaIkkunaKoodi.delete('1.0', END)
+            s.__paaIkkunaKoodi.insert('1.0', SQL.tuoKoodi(value))
+            s.__paaIkkunaOrjaKuvaus.config(state=DISABLED)
+            s.__paaIkkunaKoodi.config(state=DISABLED)
+            s.__paaikkunaOikeaTallenna.config(state=DISABLED)
+            s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
+            s.__paaIkkunaOrjaKuvaus.config(bg="grey95")
+            s.__paaIkkunaKoodi.config(bg="grey95")
+            s.__muokkaustila = 0
+        except TclError:
+            pass
 
     def UusiToiminto(s):
         s.__uusiToimintoIkkuna=Toplevel()
@@ -235,7 +237,7 @@ class Gui():
         s.__valitseNaoIpEnt.grid(row=4, column=1, columnspan=2, sticky=W+E)
         s.__valitseNaoPortEnt=Entry(s.__ValitseNaoIkkuna, width=30)
         s.__valitseNaoPortEnt.grid(row=5, column=1, columnspan=2, sticky=W+E)
-        s.__toiminnonTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: SQL.tallennaRobotti(
+        s.__toiminnonTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: s.tallennaNao(
                         nimi=s.__valitseNaoNimiEnt.get(),
                         kuvaus=s.__valitseNaoKuvausEnt.get("0.0", END),
                         ip=s.__valitseNaoIpEnt.get(),
@@ -243,6 +245,9 @@ class Gui():
         s.__toiminnonTallennaPainike.grid(row=6, column=1, sticky=E, pady=1)
         s.__toiminnonPeruutaPainike=Button(s.__ValitseNaoIkkuna, text="Peruuta", command=lambda: s.__ValitseNaoIkkuna.destroy())
         s.__toiminnonPeruutaPainike.grid(row=6, column=2, sticky=W, padx=2)
+    def tallennaNao(s, nimi, kuvaus, ip, portti):
+        SQL.tallennaRobotti(nimi, kuvaus, ip, portti)
+        s.__ValitseNaoIkkuna.destroy()
     def valitseNao(s):
         s.__ValitseNaoIkkuna=Toplevel()
         s.__ValitseNaoIkkuna.attributes("-topmost", True)
@@ -293,20 +298,41 @@ class Gui():
         SQL.robottiLaajuus.clear()
         SQL.robottiTiedot.clear()
         SQL.tuoRobotit()
+        s.__valitseNaoNimiEnt.delete(0, END)
+        s.__valitseNaoKuvausEnt.delete('1.0', END)
+        s.__valitseNaoIpEnt.delete(0, END)
+        s.__valitseNaoPortEnt.delete(0, END)
+        s.__valitseNaoNimiEnt.config(state=DISABLED)
+        s.__valitseNaoKuvausEnt.config(state=DISABLED)
+        s.__valitseNaoKuvausEnt.config(bg="grey94")
+        s.__valitseNaoIpEnt.config(state=DISABLED)
+        s.__valitseNaoPortEnt.config(state=DISABLED)
+        s.__toiminnonValitsePainike.config(state=DISABLED)
+        s.__toiminnonTallennaPainike.config(state=DISABLED)
         for robotti in SQL.robottiTiedot:
             s.__ValitseNaoLista.insert('end', robotti)
     def NaoListboxValinta(s, event):
-        widget = event.widget
-        selection=widget.curselection()
-        value = widget.get(selection)
-        s.__valitseNaoNimiEnt.delete(0, END)
-        s.__valitseNaoNimiEnt.insert(0, value)
-        s.__valitseNaoKuvausEnt.delete('1.0', END)
-        s.__valitseNaoKuvausEnt.insert('1.0', SQL.tuoRobottiKuvaus(value[-1]))
-        s.__valitseNaoIpEnt.delete(0, END)
-        s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value[-1]))
-        s.__valitseNaoPortEnt.delete(0, END)
-        s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
+        try:
+            widget = event.widget
+            selection=widget.curselection()
+            value = widget.get(selection)
+            s.__valitseNaoNimiEnt.config(state=NORMAL)
+            s.__valitseNaoKuvausEnt.config(state=NORMAL)
+            s.__valitseNaoKuvausEnt.config(bg="White")
+            s.__valitseNaoIpEnt.config(state=NORMAL)
+            s.__valitseNaoPortEnt.config(state=NORMAL)
+            s.__toiminnonValitsePainike.config(state=NORMAL)
+            s.__toiminnonTallennaPainike.config(state=NORMAL)
+            s.__valitseNaoNimiEnt.delete(0, END)
+            s.__valitseNaoNimiEnt.insert(0, value)
+            s.__valitseNaoKuvausEnt.delete('1.0', END)
+            s.__valitseNaoKuvausEnt.insert('1.0', SQL.tuoRobottiKuvaus(value[-1]))
+            s.__valitseNaoIpEnt.delete(0, END)
+            s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value[-1]))
+            s.__valitseNaoPortEnt.delete(0, END)
+            s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
+        except TclError:
+            pass
     def ValitseNao(s, nimi, ip, portti):
         s.__alapalkkiYhdistetty.configure(text="(C)", fg="yellow")
         NAO.RobottiNimi=nimi
