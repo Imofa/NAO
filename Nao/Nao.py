@@ -220,40 +220,42 @@ class Gui():
             s.__muokkaustila = 0 #MUOKKAUSTILAN koodi
     
     def lisaaNao(s):
-        s.__ValitseNaoIkkuna=Toplevel()
-        s.__ValitseNaoIkkuna.attributes("-topmost", True)
-        s.__ValitseNaoIkkuna.title("Lisää robotti")
-        s.__ValitseNaoIkkuna.resizable(0,0)
-        s.__valitseNaoNimiLab=Label(s.__ValitseNaoIkkuna, text="Robotin nimi:", width=15).grid(row=2, column=0, sticky=E)
-        s.__valitseNaoKuvausLab=Label(s.__ValitseNaoIkkuna, text="Robotin kuvaus:", width=15).grid(row=3, column=0, sticky=E)
-        s.__valitseNaoIpLab=Label(s.__ValitseNaoIkkuna, text="Robotin IP:", width=15).grid(row=4, column=0, sticky=E)
-        s.__valitseNaoPortLab=Label(s.__ValitseNaoIkkuna, text="Portti", width=15).grid(row=5, column=0, sticky=E)
+        s.__LisaaNaoIkkuna=Toplevel()
+        s.__LisaaNaoIkkuna.attributes("-topmost", True)
+        s.__LisaaNaoIkkuna.title("Lisää robotti")
+        s.__LisaaNaoIkkuna.resizable(0,0)
+        s.__LisaaNaoNimiLab=Label(s.__LisaaNaoIkkuna, text="Robotin nimi:", width=15).grid(row=2, column=0, sticky=E)
+        s.__LisaaNaoKuvausLab=Label(s.__LisaaNaoIkkuna, text="Robotin kuvaus:", width=15).grid(row=3, column=0, sticky=E)
+        s.__LisaaNaoIpLab=Label(s.__LisaaNaoIkkuna, text="Robotin IP:", width=15).grid(row=4, column=0, sticky=E)
+        s.__LisaaNaoPortLab=Label(s.__LisaaNaoIkkuna, text="Portti", width=15).grid(row=5, column=0, sticky=E)
         #Entrykentät
-        s.__valitseNaoNimiEnt=Entry(s.__ValitseNaoIkkuna)
-        s.__valitseNaoNimiEnt.grid(row=2, column=1, columnspan=2, sticky=W+E)
-        s.__valitseNaoKuvausEnt=Text(s.__ValitseNaoIkkuna, width=30, height=3, wrap=WORD)
-        s.__valitseNaoKuvausEnt.grid(row=3, column=1, columnspan=2, sticky=W+E)
-        s.__valitseNaoIpEnt=Entry(s.__ValitseNaoIkkuna, width=30)
-        s.__valitseNaoIpEnt.grid(row=4, column=1, columnspan=2, sticky=W+E)
-        s.__valitseNaoPortEnt=Entry(s.__ValitseNaoIkkuna, width=30)
-        s.__valitseNaoPortEnt.grid(row=5, column=1, columnspan=2, sticky=W+E)
-        s.__toiminnonTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: s.tallennaNao(
-                        nimi=s.__valitseNaoNimiEnt.get(),
-                        kuvaus=s.__valitseNaoKuvausEnt.get("0.0", END),
-                        ip=s.__valitseNaoIpEnt.get(),
-                        portti=s.__valitseNaoPortEnt.get()))
+        s.__LisaaNaoNimiEnt=Entry(s.__LisaaNaoIkkuna)
+        s.__LisaaNaoNimiEnt.grid(row=2, column=1, columnspan=2, sticky=W+E)
+        s.__LisaaNaoKuvausEnt=Text(s.__LisaaNaoIkkuna, width=30, height=3, wrap=WORD)
+        s.__LisaaNaoKuvausEnt.grid(row=3, column=1, columnspan=2, sticky=W+E)
+        s.__LisaaNaoIpEnt=Entry(s.__LisaaNaoIkkuna, width=30)
+        s.__LisaaNaoIpEnt.grid(row=4, column=1, columnspan=2, sticky=W+E)
+        s.__LisaaNaoPortEnt=Entry(s.__LisaaNaoIkkuna, width=30)
+        s.__LisaaNaoPortEnt.grid(row=5, column=1, columnspan=2, sticky=W+E)
+        s.__toiminnonTallennaPainike=Button(s.__LisaaNaoIkkuna, text="Tallenna", command=lambda: s.tallennaNao(
+                        nimi=s.__LisaaNaoNimiEnt.get(),
+                        kuvaus=s.__LisaaNaoKuvausEnt.get("0.0", END),
+                        ip=s.__LisaaNaoIpEnt.get(),
+                        portti=s.__LisaaNaoPortEnt.get()))
         s.__toiminnonTallennaPainike.grid(row=6, column=1, sticky=E, pady=1)
-        s.__toiminnonPeruutaPainike=Button(s.__ValitseNaoIkkuna, text="Peruuta", command=lambda: s.__ValitseNaoIkkuna.destroy())
+        s.__toiminnonPeruutaPainike=Button(s.__LisaaNaoIkkuna, text="Peruuta", command=lambda: s.__LisaaNaoIkkuna.destroy())
         s.__toiminnonPeruutaPainike.grid(row=6, column=2, sticky=W, padx=2)
     def tallennaNao(s, nimi, kuvaus, ip, portti):
         SQL.tallennaRobotti(nimi, kuvaus, ip, portti)
-        s.__ValitseNaoIkkuna.destroy()
+        s.__LisaaNaoIkkuna.destroy()
+        s.PaivitaNao()
+
     def valitseNao(s):
         s.__ValitseNaoIkkuna=Toplevel()
         s.__ValitseNaoIkkuna.attributes("-topmost", True)
         s.__ValitseNaoIkkuna.title("Valitse robotti")
         s.__ValitseNaoIkkuna.resizable(0,0)
-
+        s.__ValitseNaoLisaa=Button(s.__ValitseNaoIkkuna, text="Lisää Robotti", command=lambda: s.lisaaNao()).grid(row=0, column=0, sticky=E+W)
         s.__ValitseNaoLista=Listbox(s.__ValitseNaoIkkuna, height=6)
         s.__ValitseNaoLista.config(exportselection=False)
         s.__ValitseNaoLista.bind("<<ListboxSelect>>", s.NaoListboxValinta)
@@ -273,27 +275,37 @@ class Gui():
         s.__valitseNaoIpEnt.grid(row=4, column=2, columnspan=3, sticky=W+E, padx=1)
         s.__valitseNaoPortEnt=Entry(s.__ValitseNaoIkkuna, width=30)
         s.__valitseNaoPortEnt.grid(row=5, column=2, columnspan=3, sticky=W+E, padx=1)
-        s.__toiminnonPoistaPainike=Button(s.__ValitseNaoIkkuna, text="Poista", command=lambda: s.PoistaNao())
-        s.__toiminnonPoistaPainike.grid(row=6, column=0, sticky=W+E)
-        s.__toiminnonValitsePainike=Button(s.__ValitseNaoIkkuna, text="Valitse", command=lambda: s.ValitseNao(
+        s.__ValitseNaoPoistaPainike=Button(s.__ValitseNaoIkkuna, text="Poista", command=lambda: s.PoistaNao())
+        s.__ValitseNaoPoistaPainike.grid(row=6, column=0, sticky=W+E)
+        s.__ValitseNaoValitsePainike=Button(s.__ValitseNaoIkkuna, text="Valitse", command=lambda: s.ValitseNaoListalta(
                         nimi=s.__valitseNaoNimiEnt.get(),
                         ip=s.__valitseNaoIpEnt.get(),
                         portti=s.__valitseNaoPortEnt.get()))
-        s.__toiminnonValitsePainike.grid(row=6, column=2, sticky=W+E)
-        s.__toiminnonTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: SQL.paivitaRobotti(
+        s.__ValitseNaoValitsePainike.grid(row=6, column=2, sticky=W+E)
+        s.__ValitseNaoTallennaPainike=Button(s.__ValitseNaoIkkuna, text="Tallenna", command=lambda: SQL.paivitaRobotti(
                         nimi=s.__valitseNaoNimiEnt.get(),
                         kuvaus=s.__valitseNaoKuvausEnt.get("0.0", END),
                         ip=s.__valitseNaoIpEnt.get(),
                         portti=s.__valitseNaoPortEnt.get()))
-        s.__toiminnonTallennaPainike.grid(row=6, column=3, sticky=W+E, pady=1)
-        s.__toiminnonPeruutaPainike=Button(s.__ValitseNaoIkkuna, text="Peruuta", command=lambda: s.__ValitseNaoIkkuna.destroy())
-        s.__toiminnonPeruutaPainike.grid(row=6, column=4, sticky=W+E, padx=2)
+        s.__ValitseNaoTallennaPainike.grid(row=6, column=3, sticky=W+E, pady=1)
+        s.__ValitseNaoPeruutaPainike=Button(s.__ValitseNaoIkkuna, text="Peruuta", command=lambda: s.__ValitseNaoIkkuna.destroy())
+        s.__ValitseNaoPeruutaPainike.grid(row=6, column=4, sticky=W+E, padx=2)
         s.PaivitaNao()
     def PoistaNao(s):
         value=s.__valitseNaoNimiEnt.get()
         SQL.poistaRobotti(value)
         s.PaivitaNao()
     def PaivitaNao(s):
+        try:
+            s.__valitseNaoNimiEnt.config(state=NORMAL)
+            s.__valitseNaoKuvausEnt.config(state=NORMAL)
+            s.__valitseNaoKuvausEnt.config(bg="white")
+            s.__valitseNaoIpEnt.config(state=NORMAL)
+            s.__valitseNaoPortEnt.config(state=NORMAL)
+            s.__ValitseNaoValitsePainike.config(state=NORMAL)
+            s.__ValitseNaoTallennaPainike.config(state=NORMAL)
+        except TclError:
+            pass
         s.__ValitseNaoLista.delete(0, END)
         SQL.robottiLaajuus.clear()
         SQL.robottiTiedot.clear()
@@ -302,27 +314,32 @@ class Gui():
         s.__valitseNaoKuvausEnt.delete('1.0', END)
         s.__valitseNaoIpEnt.delete(0, END)
         s.__valitseNaoPortEnt.delete(0, END)
-        s.__valitseNaoNimiEnt.config(state=DISABLED)
-        s.__valitseNaoKuvausEnt.config(state=DISABLED)
-        s.__valitseNaoKuvausEnt.config(bg="grey94")
-        s.__valitseNaoIpEnt.config(state=DISABLED)
-        s.__valitseNaoPortEnt.config(state=DISABLED)
-        s.__toiminnonValitsePainike.config(state=DISABLED)
-        s.__toiminnonTallennaPainike.config(state=DISABLED)
         for robotti in SQL.robottiTiedot:
             s.__ValitseNaoLista.insert('end', robotti)
-    def NaoListboxValinta(s, event):
         try:
+            s.__valitseNaoNimiEnt.config(state=DISABLED)
+            s.__valitseNaoKuvausEnt.config(state=DISABLED)
+            s.__valitseNaoKuvausEnt.config(bg="grey94")
+            s.__valitseNaoIpEnt.config(state=DISABLED)
+            s.__valitseNaoPortEnt.config(state=DISABLED)
+            s.__ValitseNaoValitsePainike.config(state=DISABLED)
+            s.__ValitseNaoTallennaPainike.config(state=DISABLED)
+        except TclError:
+            pass
+    def NaoListboxValinta(s, event):
             widget = event.widget
             selection=widget.curselection()
             value = widget.get(selection)
-            s.__valitseNaoNimiEnt.config(state=NORMAL)
-            s.__valitseNaoKuvausEnt.config(state=NORMAL)
-            s.__valitseNaoKuvausEnt.config(bg="White")
-            s.__valitseNaoIpEnt.config(state=NORMAL)
-            s.__valitseNaoPortEnt.config(state=NORMAL)
-            s.__toiminnonValitsePainike.config(state=NORMAL)
-            s.__toiminnonTallennaPainike.config(state=NORMAL)
+            try:
+                s.__valitseNaoNimiEnt.config(state=NORMAL)
+                s.__valitseNaoKuvausEnt.config(state=NORMAL)
+                s.__valitseNaoKuvausEnt.config(bg="White")
+                s.__valitseNaoIpEnt.config(state=NORMAL)
+                s.__valitseNaoPortEnt.config(state=NORMAL)
+                s.__ValitseNaoValitsePainike.config(state=NORMAL)
+                s.__ValitseNaoTallennaPainike.config(state=NORMAL)
+            except TclError:
+                pass
             s.__valitseNaoNimiEnt.delete(0, END)
             s.__valitseNaoNimiEnt.insert(0, value)
             s.__valitseNaoKuvausEnt.delete('1.0', END)
@@ -331,9 +348,8 @@ class Gui():
             s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value[-1]))
             s.__valitseNaoPortEnt.delete(0, END)
             s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
-        except TclError:
-            pass
-    def ValitseNao(s, nimi, ip, portti):
+
+    def ValitseNaoListalta(s, nimi, ip, portti):
         s.__alapalkkiYhdistetty.configure(text="(C)", fg="yellow")
         NAO.RobottiNimi=nimi
         NAO.RobottiIP=ip

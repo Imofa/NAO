@@ -85,7 +85,6 @@ def uusiToiminto(toiminto, kuvaus, koodi):
     if len(toiminto) > 0:
         koodi = str.replace(koodi, "'", "HEITTOMERKKI")
         sql = ("INSERT INTO nao_tiedot(toiminto, kuvaus, koodi) VALUES('{0}','{1}','{2}')").format(toiminto,kuvaus,koodi)
-        print(sql)
         try:
             cursor.execute(sql)
         except:
