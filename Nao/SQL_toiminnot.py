@@ -43,7 +43,7 @@ def tuoTietokanta():
         for i in range(len(tietokantaLaajuus)):
             tuoTieto(index)
             index = index+1
-    except:
+    except ConnectionError:
         yhteys.rollback()
         messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoTietokanta")
 
@@ -51,9 +51,10 @@ def tuoTieto(index):
     sql = ("SELECT toiminto FROM nao_tiedot WHERE nro = {0}").format(tietokantaLaajuus[index])
     try:
         cursor.execute(sql)
-        tieto = cursor.fetchone()
-        tieto = tieto[-1]
-        tietokantaToimintoTiedot.append(tieto)
+        toiminto = cursor.fetchone()
+        toiminto = toiminto[-1]
+        toiminto = str.replace(toiminto, "HEITTOMERKKI", "'")
+        tietokantaToimintoTiedot.append(toiminto)
     except:
         yhteys.rollback()
         messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoTieto")
@@ -64,6 +65,7 @@ def tuoToiminto(value):
         cursor.execute(sql)
         kuvaus = cursor.fetchone()
         kuvaus = kuvaus[-1]
+        kuvaus = str.replace(kuvaus, "HEITTOMERKKI", "'")
         return kuvaus
     except:
         yhteys.rollback()
@@ -83,7 +85,9 @@ def tuoKoodi(value):
 
 def uusiToiminto(toiminto, kuvaus, koodi):
     if len(toiminto) > 0:
-        koodi = str.replace(koodi, "'", "HEITTOMERKKI")
+        kuvaus=str.replace(kuvaus, "'", "HEITTOMERKKI")
+        toiminto=str.replace(toiminto, "'", "HEITTOMERKKI")
+        koodi=str.replace(koodi, "'", "HEITTOMERKKI")
         sql = ("INSERT INTO nao_tiedot(toiminto, kuvaus, koodi) VALUES('{0}','{1}','{2}')").format(toiminto,kuvaus,koodi)
         try:
             cursor.execute(sql)
@@ -94,6 +98,7 @@ def uusiToiminto(toiminto, kuvaus, koodi):
         messagebox.showerror("VIRHE","Nimi on pakollinen")
 
 def poistaToiminto(toiminto):
+    toiminto=str.replace(toiminto, "'", "HEITTOMERKKI")
     vastaus=messagebox.askquestion("Poista Toiminto", "Oletko varma?\n Tätä toimintoa ei voi peruuttaa")
     if vastaus == 'yes':
         sql = ("DELETE FROM nao_tiedot WHERE toiminto = '{0}'").format(toiminto)
@@ -109,9 +114,10 @@ def poistaToiminto(toiminto):
 def tallennaKoodi(koodi, kuvaus, toiminto):
     vastaus=messagebox.askquestion("Poista Toiminto", "Oletko varma?\n Tätä toimintoa ei voi peruuttaa")
     if vastaus == 'yes':
-        koodi = str.replace(koodi, "'", "HEITTOMERKKI")
+        kuvaus=str.replace(kuvaus, "'", "HEITTOMERKKI")
+        toiminto=str.replace(toiminto, "'", "HEITTOMERKKI")
+        koodi=str.replace(koodi, "'", "HEITTOMERKKI")
         sql = ("UPDATE nao_tiedot SET koodi = '{0}', kuvaus = '{1}' WHERE toiminto= '{2}'").format(koodi, kuvaus, toiminto)
-        print(sql)
         try:
             cursor.execute(sql)
             messagebox.showinfo("Onnistui", "Koodin tallennus suoritettu onnistuneesti")
@@ -143,15 +149,17 @@ def tuoRobotti(index):
     sql = ("SELECT nimi FROM nao_robotti WHERE nro = {0}").format(robottiLaajuus[index])
     try:
         cursor.execute(sql)
-        tieto = cursor.fetchone()
-        tieto = tieto
-        robottiTiedot.append(tieto)
+        nimi = cursor.fetchone()
+        nimi = nimi
+        robottiTiedot.append(nimi)
     except:
         yhteys.rollback()
-        messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoTieto")
+        messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoRobotti")
 
 def tallennaRobotti(nimi, kuvaus, ip, portti):
     if len(nimi) > 0 and len(ip) > 0 and len(portti) > 0:
+        nimi=str.replace(nimi, "'", "HEITTOMERKKI")
+        kuvaus=str.replace(kuvaus, "'", "HEITTOMERKKI")
         sql = ("INSERT INTO nao_robotti (nimi, kuvaus, ip, port) VALUES ('{0}', '{1}', '{2}', '{3}')").format(nimi, kuvaus, ip, portti)
         try:
             cursor.execute(sql)
@@ -168,6 +176,7 @@ def tuoRobottiKuvaus(value):
         cursor.execute(sql)
         kuvaus = cursor.fetchone()
         kuvaus = kuvaus[-1]
+        kuvaus = str.replace(kuvaus, "HEITTOMERKKI", "'")
         return kuvaus
     except:
         yhteys.rollback()
@@ -195,10 +204,11 @@ def tuoRobottiPortti(value):
         yhteys.rollback()
         messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoRobottiPortti")
 
-def poistaRobotti(value):
+def poistaRobotti(nimi):
     vastaus=messagebox.askquestion("Poista robotti", "Oletko varma?\n Tätä toimintoa ei voi peruuttaa")
     if vastaus == 'yes':
-        sql = ("DELETE FROM nao_robotti WHERE nimi = '{0}'").format(value)
+        nimi = str.replace(nimi, "'", "HEITTOMERKKI")
+        sql = ("DELETE FROM nao_robotti WHERE nimi = '{0}'").format(nimi)
         try:
             cursor.execute(sql)
             messagebox.showinfo("Onnistui", "Tapahtuma suoritettu onnistuneesti")
@@ -211,6 +221,8 @@ def poistaRobotti(value):
 def paivitaRobotti(nimi, kuvaus, ip, portti):
     vastaus=messagebox.askquestion("Päivitä robotin tiedot", "Oletko varma?\n Tätä toimintoa ei voi peruuttaa")
     if vastaus == 'yes':
+        nimi=str.replace(nimi, "'", "HEITTOMERKKI")
+        kuvaus=str.replace(kuvaus, "'", "HEITTOMERKKI")
         sql = ("UPDATE nao_robotti SET kuvaus = '{1}', ip = '{2}', port = '{3}' WHERE nimi = '{0}'").format(nimi, kuvaus, ip, portti)
         try:
             cursor.execute(sql)

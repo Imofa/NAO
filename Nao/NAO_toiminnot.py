@@ -9,6 +9,8 @@ RobottiIP="0.0.0.0"
 RobottiPort=""
 vastaus=""
 
+python27="C:\Python27\python.exe"
+
 def testNaoYhteys():
     with open(os.devnull, 'w') as DEVNULL:
         try:
@@ -34,7 +36,8 @@ def suoritaToiminto(koodi):
     suorita = open("suorite.py", "w")
     suorita.write(koodi)
     suorita.close()
-    os.system("suorite.py")
+    suoritetaan = subprocess.Popen([python27, "suorite.py"])
+#    os.system("suorite.py")
     pass
 
 

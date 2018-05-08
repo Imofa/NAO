@@ -27,7 +27,7 @@ class Gui():
         s.__valikkoPalkki.add_cascade(label="NAO", menu=s.__valikkoRobotti)
         #valikkoFile objektit
         s.__valikkoFile.add_command(label="Päivitä", command=lambda: s.PaivitaOrja())
-        s.__valikkoFile.add_command(label="Yhdistä", command=lambda: s.Yhdistetty())
+        s.__valikkoFile.add_command(label="Yhdistä", command=lambda: s.Yhdista())
         s.__valikkoFile.add_separator()
         s.__valikkoFile.add_command(label="Lopeta", command=lambda: s.__root.destroy())
         #valikkoRobotti objektit
@@ -56,7 +56,7 @@ class Gui():
         s.__paaIkkunaLista.config(exportselection=False)
         s.__paaIkkunaLista.bind("<<ListboxSelect>>", s.ListboxValinta)
         s.__paaIkkunaLista.grid(row=2, column=0, sticky=E+W, pady=1, padx=1)
-        for toiminto in SQL.tietokantaToimintoTiedot:
+        for toiminto in sorted(SQL.tietokantaToimintoTiedot,key=str.lower):
             s.__paaIkkunaLista.insert('end', toiminto)
 
         #paaIkkunaText ruudun oikeanpuolinen ruutu.
@@ -134,7 +134,7 @@ class Gui():
         SQL.tietokantaToimintoTiedot.clear()
         SQL.tietokantaLaajuus.clear()
         SQL.tuoTietokanta()
-        for toiminto in SQL.tietokantaToimintoTiedot:
+        for toiminto in sorted(SQL.tietokantaToimintoTiedot,key=str.lower):
             s.__paaIkkunaLista.insert('end', toiminto)
         s.__paaIkkunaOrjaPoista.config(state=DISABLED)
         pass
@@ -204,6 +204,11 @@ class Gui():
         SQL.tallennaKoodi(koodi, kuvaus, toiminto)
         s.__paaIkkunaOrjaKuvaus.config(state=DISABLED)
         s.__paaIkkunaKoodi.config(state=DISABLED)
+        s.__paaIkkunaOrjaKuvaus.config(state=DISABLED, bg="grey95")
+        s.__paaIkkunaKoodi.config(state=DISABLED, bg="grey95")
+        s.__paaikkunaOikeaTallenna.config(state=DISABLED)
+        s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
+        s.__muokkaustila = 0
 
     def Muokkaa(s):
         if s.__muokkaustila == 0:
@@ -260,7 +265,7 @@ class Gui():
         s.__ValitseNaoLista.config(exportselection=False)
         s.__ValitseNaoLista.bind("<<ListboxSelect>>", s.NaoListboxValinta)
         s.__ValitseNaoLista.grid(row=2, column=0, rowspan=4, sticky=E+W+S+N, pady=1, padx=1)
-        for robotti in SQL.robottiTiedot:
+        for robotti in sorted(SQL.robottiTiedot):
             s.__ValitseNaoLista.insert('end', robotti)
         s.__valitseNaoNimiLab=Label(s.__ValitseNaoIkkuna, text="Robotin nimi:", width=15).grid(row=2, column=1, sticky=E)
         s.__valitseNaoKuvausLab=Label(s.__ValitseNaoIkkuna, text="Robotin kuvaus:", width=15).grid(row=3, column=1, sticky=E)
@@ -359,6 +364,50 @@ class Gui():
         s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
         s.__ValitseNaoIkkuna.destroy()
 
+
+    def Yhdista(s):
+        s.__YhdistaIkkuna=Toplevel()
+        s.__YhdistaIkkuna.attributes("-topmost", True)
+        s.__YhdistaIkkuna.title("Yhdistä")
+        s.__YhdistaIkkuna.resizable(0,0)
+        s.__YhdistaHostLab=Label(s.__YhdistaIkkuna, text="HOST:", width=15).grid(row=2, column=0, sticky=E)
+        s.__YhdistaPortLab=Label(s.__YhdistaIkkuna, text="PORT:", width=15).grid(row=3, column=0, sticky=E)
+        s.__YhdistaUserLab=Label(s.__YhdistaIkkuna, text="USER:", width=15).grid(row=4, column=0, sticky=E)
+        s.__YhdistaPasswordLab=Label(s.__YhdistaIkkuna, text="PASSWORD", width=15).grid(row=5, column=0, sticky=E)
+        s.__YhdistaDatabaseLab=Label(s.__YhdistaIkkuna, text="Database", width=15).grid(row=6, column=0, sticky=E)
+        #Entrykentät
+        s.__YhdistaHostEnt=Entry(s.__YhdistaIkkuna)
+        s.__YhdistaHostEnt.grid(row=2, column=1, columnspan=2, sticky=W+E)
+        s.__YhdistaPortEnt=Entry(s.__YhdistaIkkuna, width=30)
+        s.__YhdistaPortEnt.grid(row=3, column=1, columnspan=2, sticky=W+E)
+        s.__YhdistaUserEnt=Entry(s.__YhdistaIkkuna, width=30)
+        s.__YhdistaUserEnt.grid(row=4, column=1, columnspan=2, sticky=W+E)
+        s.__YhdistaPasswordEnt=Entry(s.__YhdistaIkkuna, width=30)
+        s.__YhdistaPasswordEnt.grid(row=5, column=1, columnspan=2, sticky=W+E)
+        s.__YhdistaDatabaseEnt=Entry(s.__YhdistaIkkuna, width=30)
+        s.__YhdistaDatabaseEnt.grid(row=6, column=1, columnspan=2, sticky=W+E)
+        s.__toiminnonTallennaPainike=Button(s.__YhdistaIkkuna, text="Tallenna", command=lambda: YhdistaKomento(
+                HOST=s.__YhdistaHostEnt.get(),
+                PORT=s.__YhdistaPortEnt.get(),
+                USER=s.__YhdistaUserEnt.get(),
+                PASSWORD=s.__YhdistaPasswordEnt.get(),
+                DATABASE=s.__YhdistaDatabaseEnt.get()))
+        s.__toiminnonTallennaPainike.grid(row=7, column=2, sticky=W+E, pady=1)
+        s.__toiminnonPeruutaPainike=Button(s.__YhdistaIkkuna, text="Peruuta", command=lambda: s.__YhdistaIkkuna.destroy())
+        s.__toiminnonPeruutaPainike.grid(row=7, column=3, sticky=W+E, padx=2)
+        #Tuodaan palvelimen tiedot entry kenttään
+        s.__YhdistaHostEnt.insert(SQL.HOST)
+        s.__YhdistaPortEnt.insert(SQL.PORT)
+        s.__YhdistaUserEnt.insert(SQL.USER)
+        s.__YhdistaPasswordEnt.insert(SQL.PASSWORD)
+        s.__YhdistaDatabaseEnt.insert(SQL.DB)
+    def YhdistaKomento(HOST,PORT,USER,PASSWORD,DATABASE):
+        SQL.HOST=HOST
+        SQL.PORT=PORT
+        SQL.USER=USER
+        SQL.PASSWORD=PASSWORD
+        SQL.DB=DATABASE
+        pass
 
 
 
