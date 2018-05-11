@@ -385,6 +385,8 @@ class Gui():
         s.__YhdistaPasswordEnt.grid(row=5, column=1, columnspan=2, sticky=W+E)
         s.__YhdistaDatabaseEnt=Entry(s.__YhdistaIkkuna, width=30)
         s.__YhdistaDatabaseEnt.grid(row=6, column=1, columnspan=2, sticky=W+E)
+        s.__toiminnonDefaultPainike=Button(s.__YhdistaIkkuna, text="Default", command=lambda: s.DefaultPalvelin())
+        s.__toiminnonDefaultPainike.grid(row=7, column=0)
         s.__toiminnonTallennaPainike=Button(s.__YhdistaIkkuna, text="Tallenna", command=lambda: s.YhdistaKomento(
                 HOST=s.__YhdistaHostEnt.get(),
                 PORT=s.__YhdistaPortEnt.get(),
@@ -394,6 +396,18 @@ class Gui():
         s.__toiminnonTallennaPainike.grid(row=7, column=2, sticky=W+E, pady=1)
         s.__toiminnonPeruutaPainike=Button(s.__YhdistaIkkuna, text="Peruuta", command=lambda: s.__YhdistaIkkuna.destroy())
         s.__toiminnonPeruutaPainike.grid(row=7, column=3, sticky=W+E, padx=2)
+        s.TuoPalvelinTiedot()
+
+    def DefaultPalvelin(s):
+        s.__YhdistaHostEnt.delete(0, END)
+        s.__YhdistaPortEnt.delete(0, END)
+        s.__YhdistaUserEnt.delete(0, END)
+        s.__YhdistaPasswordEnt.delete(0, END)
+        s.__YhdistaDatabaseEnt.delete(0, END)
+        SQL.defaultPalvelin()
+        s.TuoPalvelinTiedot()
+
+    def TuoPalvelinTiedot(s):
         #Tuodaan palvelimen tiedot entry kenttään
         s.__YhdistaHostEnt.insert(INSERT, SQL.HOST)
         s.__YhdistaPortEnt.insert(INSERT, SQL.PORT)
@@ -403,11 +417,12 @@ class Gui():
 
     def YhdistaKomento(s,HOST,PORT,USER,PASSWORD,DATABASE):
         SQL.HOST=HOST
-        SQL.PORT=PORT
+        SQL.PORT=int(PORT)
         SQL.USER=USER
         SQL.PASSWORD=PASSWORD
         SQL.DB=DATABASE
         SQL.tallennaPalvelin()
+        SQL.testaaPalvelin()
         s.__YhdistaIkkuna.destroy()
         pass
 

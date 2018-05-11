@@ -28,6 +28,18 @@ try:
 except ConnectionError:
     messagebox.showerror("VIRHE!","Yhteys virhe. \nTietokantaan ei saatu yhteyytä")
 
+def testaaPalvelin():
+    try:
+        yhteys = pymysql.connect(host=HOST, port=PORT, user=USER, password=PASSWORD, db=DB)
+        cursor = yhteys.cursor()
+        yhdistetty = True
+    except ConnectionError:
+        yhdistetty = False
+    if yhdistetty == True:
+        messagebox.showinfo("Onnistui","Yhdistetty palvelimeen onnistuneesti")
+    else: 
+         messagebox.showerror("VIRHE!","Yhteys virhe. \nTietokantaan ei saatu yhteyytä")
+
 def defaultPalvelin():
     HOST = "127.0.0.1"
     PORT = 3306
@@ -36,20 +48,23 @@ def defaultPalvelin():
     DB = "nao_tietokanta"
 
 def tuoPalvelin():
-    palvelin=open("PalvelinAsetukset.txt", "r")
-    rivit=palvelin.readlines()
-    HOST = rivit[0]
-    PORT = rivit[1]
-    USER = rivit[2]
-    PASSWORD = rivit[3]
-    DB = rivit[4]
-    palvelin.close()
+    try:
+        palvelin=open("PalvelinAsetukset.txt", "r")
+        rivit=palvelin.readlines()
+        HOST = rivit[0]
+        PORT = int(rivit[1])
+        USER = rivit[2]
+        PASSWORD = rivit[3]
+        DB = rivit[4]
+        palvelin.close()
+    except:
+        defaultPalvelin()
 
 def tallennaPalvelin():
     vastaus=messagebox.askquestion("Tallenna palvelintiedot", "Oletko varma\n Tätä toimintoa ei voi peruuttaa")
     if vastaus == 'yes':
         palvelin = open("PalvelinAsetukset.txt", "w")
-        rivit = (HOST, "\n"+ PORT+ "\n"+ USER, "\n"+ PASSWORD, "\n"+DB)
+        rivit = (HOST, "\n"+ str(PORT)+ "\n"+ USER, "\n"+ PASSWORD, "\n"+DB)
         palvelin.writelines(rivit)
         palvelin.close()
 

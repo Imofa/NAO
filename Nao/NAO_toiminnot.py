@@ -15,26 +15,6 @@ python27="C:\Python27\python.exe"
 """
 Vanha ping komento
 """
-#def testNaoYhteys():
-#    with open(os.devnull, 'w') as DEVNULL:
-#        try:
-#            vastaus = subprocess.check_call(
-#                ['ping', '-n', '1', '-w', '200', RobottiIP],
-#                stdout=DEVNULL,  # suppress output
-#                stderr=DEVNULL
-#            )
-#            if vastaus == 0:
-#                palaute = "Y"
-#                return palaute
-#            elif vastaus == 1:
-#                palaute = "N"
-#                return palaute
-#            else:
-#                palaute = "C"
-#                return palaute
-#        except subprocess.CalledProcessError:
-#            palaute = "N"
-#            return palaute
 
 def testNaoYhteys():
     s = socket.socket()
