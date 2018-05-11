@@ -3,6 +3,7 @@
 import os
 import subprocess
 import socket
+from tkinter import messagebox
 
 #import naoqi
 RobottiNimi=""
@@ -42,7 +43,6 @@ def testNaoYhteys():
         vastaus = True
     except Exception as e:
         vastaus = False
-        print("something's wrong with %s:%d. Exception is %s" % (RobottiIP, int(RobottiPort), e))
     finally:
         s.close()
     if vastaus == True:
@@ -60,7 +60,6 @@ def suoritaToiminto(koodi):
     suorita.write(koodi)
     suorita.close()
     suoritetaan = subprocess.Popen([python27, "suorite.py"])
-#    os.system("suorite.py")
     pass
 
 

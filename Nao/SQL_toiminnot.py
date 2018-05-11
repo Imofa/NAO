@@ -19,7 +19,6 @@ import pymysql
 from pymysql import IntegrityError, InternalError
 from tkinter import messagebox
 
-
 """
 Testataan yhteys palvelimeen
 """
@@ -28,6 +27,31 @@ try:
 	cursor = yhteys.cursor()
 except ConnectionError:
     messagebox.showerror("VIRHE!","Yhteys virhe. \nTietokantaan ei saatu yhteyytä")
+
+def defaultPalvelin():
+    HOST = "127.0.0.1"
+    PORT = 3306
+    USER = "root"
+    PASSWORD = ""
+    DB = "nao_tietokanta"
+
+def tuoPalvelin():
+    palvelin=open("PalvelinAsetukset.txt", "r")
+    rivit=palvelin.readlines()
+    HOST = rivit[0]
+    PORT = rivit[1]
+    USER = rivit[2]
+    PASSWORD = rivit[3]
+    DB = rivit[4]
+    palvelin.close()
+
+def tallennaPalvelin():
+    vastaus=messagebox.askquestion("Tallenna palvelintiedot", "Oletko varma\n Tätä toimintoa ei voi peruuttaa")
+    if vastaus == 'yes':
+        palvelin = open("PalvelinAsetukset.txt", "w")
+        rivit = (HOST, "\n"+ PORT+ "\n"+ USER, "\n"+ PASSWORD, "\n"+DB)
+        palvelin.writelines(rivit)
+        palvelin.close()
 
 def tuoTietokanta():
     try:

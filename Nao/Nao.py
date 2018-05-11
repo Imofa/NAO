@@ -364,7 +364,6 @@ class Gui():
         s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
         s.__ValitseNaoIkkuna.destroy()
 
-
     def Yhdista(s):
         s.__YhdistaIkkuna=Toplevel()
         s.__YhdistaIkkuna.attributes("-topmost", True)
@@ -386,7 +385,7 @@ class Gui():
         s.__YhdistaPasswordEnt.grid(row=5, column=1, columnspan=2, sticky=W+E)
         s.__YhdistaDatabaseEnt=Entry(s.__YhdistaIkkuna, width=30)
         s.__YhdistaDatabaseEnt.grid(row=6, column=1, columnspan=2, sticky=W+E)
-        s.__toiminnonTallennaPainike=Button(s.__YhdistaIkkuna, text="Tallenna", command=lambda: YhdistaKomento(
+        s.__toiminnonTallennaPainike=Button(s.__YhdistaIkkuna, text="Tallenna", command=lambda: s.YhdistaKomento(
                 HOST=s.__YhdistaHostEnt.get(),
                 PORT=s.__YhdistaPortEnt.get(),
                 USER=s.__YhdistaUserEnt.get(),
@@ -396,23 +395,27 @@ class Gui():
         s.__toiminnonPeruutaPainike=Button(s.__YhdistaIkkuna, text="Peruuta", command=lambda: s.__YhdistaIkkuna.destroy())
         s.__toiminnonPeruutaPainike.grid(row=7, column=3, sticky=W+E, padx=2)
         #Tuodaan palvelimen tiedot entry kenttään
-        s.__YhdistaHostEnt.insert(SQL.HOST)
-        s.__YhdistaPortEnt.insert(SQL.PORT)
-        s.__YhdistaUserEnt.insert(SQL.USER)
-        s.__YhdistaPasswordEnt.insert(SQL.PASSWORD)
-        s.__YhdistaDatabaseEnt.insert(SQL.DB)
-    def YhdistaKomento(HOST,PORT,USER,PASSWORD,DATABASE):
+        s.__YhdistaHostEnt.insert(INSERT, SQL.HOST)
+        s.__YhdistaPortEnt.insert(INSERT, SQL.PORT)
+        s.__YhdistaUserEnt.insert(INSERT, SQL.USER)
+        s.__YhdistaPasswordEnt.insert(INSERT, SQL.PASSWORD)
+        s.__YhdistaDatabaseEnt.insert(INSERT, SQL.DB)
+
+    def YhdistaKomento(s,HOST,PORT,USER,PASSWORD,DATABASE):
         SQL.HOST=HOST
         SQL.PORT=PORT
         SQL.USER=USER
         SQL.PASSWORD=PASSWORD
         SQL.DB=DATABASE
+        SQL.tallennaPalvelin()
+        s.__YhdistaIkkuna.destroy()
         pass
 
 
 
 
 def main():
+    SQL.tuoPalvelin()
     SQL.tuoTietokanta()
     SQL.tuoRobotit()
     Gui()

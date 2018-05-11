@@ -1,14 +1,12 @@
+robotIp = "127.0.0.1"
+robotPort = 54924
+
 # -*- encoding: UTF-8 -*- 
 
-''' Walk: Small example to make Nao walk '''
-'''       with jerky head                '''
-
-robotIp = "127.0.0.1"
-robotPort = 58287
+''' Whole Body Motion: Foot State '''
 
 import sys
-import time
-import random
+import math
 from naoqi import ALProxy
 
 
@@ -21,9 +19,14 @@ def StiffnessOn(proxy):
 
 
 def main(robotIP):
+    ''' Example of a whole body FootState
+    Warning: Needs a PoseInit before executing
+             Whole body balancer must be inactivated at the end of the script
+    '''
+
     # Init proxies.
     try:
-        motionProxy = ALProxy("ALMotion", robotIP, robotPort)
+        proxy = ALProxy("ALMotion", robotIP, robotPort)
     except Exception, e:
         print "Could not create proxy to ALMotion"
         print "Error was: ", e
@@ -35,48 +38,45 @@ def main(robotIP):
         print "Error was: ", e
 
     # Set NAO in Stiffness On
-    StiffnessOn(motionProxy)
+    StiffnessOn(proxy)
 
     # Send NAO to Pose Init
-    postureProxy.goToPosture("StandInit", 1.0)
+    postureProxy.goToPosture("StandInit", 0.5)
 
-    # Initialize the walk process.
-    # Check the robot pose and take a right posture.
-    # This is blocking called.
-    motionProxy.moveInit()
+    # Activate Whole Body Balancer.
+    isEnabled  = True
+    proxy.wbEnable(isEnabled)
 
-    testTime = 10 # seconds
-    t = 0
-    dt = 0.2
-    while (t<testTime):
+    # Legs are constrained in a plane
+    stateName  = "Plane"
+    supportLeg = "Legs"
+    proxy.wbFootState(stateName, supportLeg)
 
-        # WALK
-        X         = random.uniform(0.4, 1.0)
-        Y         = random.uniform(-0.4, 0.4)
-        Theta     = random.uniform(-0.4, 0.4)
-        Frequency = random.uniform(0.5, 1.0)
-        motionProxy.setWalkTargetVelocity(X, Y, Theta, Frequency)
+    # HipYawPitch angleInterpolation
+    # Without Whole Body balancer, foot will not be keeped plane.
+    names      = "LHipYawPitch"
+    angleLists = [-45.0, 10.0, 0.0]
+    timeLists  = [3.0, 6.0, 9.0]
+    isAbsolute = True
+    angleLists = [angle*math.pi/180.0 for angle in angleLists]
+    proxy.angleInterpolation(names, angleLists, timeLists, isAbsolute)
 
-        # JERKY HEAD
-        motionProxy.setAngles("HeadYaw", random.uniform(-1.0, 1.0), 0.6)
-        motionProxy.setAngles("HeadPitch", random.uniform(-0.5, 0.5), 0.6)
+    # Deactivate Whole Body Balancer.
+    isEnabled  = False
+    proxy.wbEnable(isEnabled)
 
-        t = t + dt
-        time.sleep(dt)
-
-    # stop walk on the next double support
-    motionProxy.stopMove()
 
 
 if __name__ == "__main__":
 
-
     if len(sys.argv) <= 1:
-        print "Usage python motion_walkWithJerkyHead.py robotIP (optional default: 127.0.0.1)"
+        print "Usage python motion_wbFootState.py robotIP (optional default: 127.0.0.1)"
     else:
         robotIp = sys.argv[1]
 
     main(robotIp)
+
+
 
 
 
