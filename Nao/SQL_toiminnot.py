@@ -41,13 +41,14 @@ def testaaPalvelin():
          messagebox.showerror("VIRHE!","Yhteys virhe. \nTietokantaan ei saatu yhteyytä")
 
 def defaultPalvelin():
+    #Default palvelimen tiedot, jotka voidaan palauttaa tarpeen vaatiessa.
     HOST = "127.0.0.1"
     PORT = 3306
     USER = "root"
     PASSWORD = ""
     DB = "nao_tietokanta"
 
-def tuoPalvelin():
+def tuoViimeisinPalvelin():
     try:
         palvelin=open("PalvelinAsetukset.txt", "r")
         rivit=palvelin.readlines()
@@ -124,9 +125,9 @@ def tuoKoodi(value):
 
 def uusiToiminto(toiminto, kuvaus, koodi):
     if len(toiminto) > 0:
-        kuvaus=str.replace(kuvaus, "'", "HEITTOMERKKI")
+        kuvaus=str.replace(kuvaus, "'", "HEITTOMERKKI")[:-1]
         toiminto=str.replace(toiminto, "'", "HEITTOMERKKI")
-        koodi=str.replace(koodi, "'", "HEITTOMERKKI")
+        koodi=str.replace(koodi, "'", "HEITTOMERKKI")[:-1]
         sql = ("INSERT INTO nao_tiedot(toiminto, kuvaus, koodi) VALUES('{0}','{1}','{2}')").format(toiminto,kuvaus,koodi)
         try:
             cursor.execute(sql)
@@ -271,4 +272,3 @@ def paivitaRobotti(nimi, kuvaus, ip, portti):
             messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:paivitaRobotti")
     else:
         pass
-

@@ -1,22 +1,18 @@
 # -*- coding:utf-8 -*-
 
-import os
 import subprocess
 import socket
 from tkinter import messagebox
 
-#import naoqi
 RobottiNimi=""
-RobottiIP="0.0.0.0"
-RobottiPort="80"
+RobottiIP=""
+RobottiPort=""
 vastaus=""
 
-python27="C:\Python27\python.exe"
-"""
-Vanha ping komento
-"""
+python27="C:\Python27\python.exe" #Polku Python27.exe luokse.
 
 def testNaoYhteys():
+    socket.setdefaulttimeout(1)
     s = socket.socket()
     try:
         s.connect((RobottiIP, int(RobottiPort))) 
@@ -42,5 +38,30 @@ def suoritaToiminto(koodi):
     suoritetaan = subprocess.Popen([python27, "suorite.py"])
     pass
 
+def tallennaRobotti():
+    robotti = open("RobottiAsetukset.txt", "w")
+    rivit = (RobottiNimi, "\n"+str(RobottiIP)+ "\n"+str(RobottiPort)+"\n")
+    robotti.writelines(rivit)
+    robotti.close()
+    
+def ViimeisinRobotti():
+    try:
+        robotti=open("RobottiAsetukset.txt", "r")
+        rivit=robotti.readlines()
+        RobottiNimi = rivit[0][:-1]
+        RobottiIP = rivit[1][:-1]
+        RobottiPort = int(rivit[2][:-1])
+        robotti.close()
+    except:
+        print("VIRHE TUO VIIMEISIN ROBOTTI")
 
-
+def robottti():
+    try:
+        robotti=open("RobottiAsetukset.txt", "r")
+        rivit=robotti.readlines()
+        RobottiNimi = rivit[0][:-1]
+        RobottiIP = rivit[1][:-1]
+        RobottiPort = int(rivit[2][:-1])
+        robotti.close()
+    except:
+        print("VIRHE TUO VIIMEISIN ROBOTTI")

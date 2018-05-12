@@ -2,8 +2,7 @@
 
 import sys
 import time
-import builtins
-#sys.path.append('..') #Kansiossa olevan modulin importtaamista varten
+#import builtins
 from tkinter import *
 from tkinter import messagebox
 from tkinter import TclError
@@ -14,6 +13,7 @@ import SQL_toiminnot as SQL #Tuodaan SQL_toiminnot moduuli
 class Gui():
     def __init__(s):
         s.__muokkaustila = 0    #Muuttuja joka tallentaa onko muokkaustila päällä vai pois
+        s.__yhdistetty = 0
         s.__root = Tk()
         s.__root.resizable(0,0)
         s.__root.title("NAO tietokanta\t by:Roope Romu")
@@ -35,7 +35,7 @@ class Gui():
         s.__valikkoRobotti.add_command(label="Valitse NAO", command=lambda: s.valitseNao())
 
         """
-        Ohjelman pää ikkuna jossa kaikki taika tapahtuu
+        Ohjelman pääikkuna, joka on jaettu oikeaan ja vasempaan ruutuun.
         """
         s.__paaIkkuna=Frame(s.__root).grid(row=0, column=0, sticky='nsew')
         s.__paaIkkunaVasenSelite=Label(s.__paaIkkuna, text="", relief=GROOVE).grid(row=0, column=0, sticky='nsew')
@@ -72,6 +72,8 @@ class Gui():
         s.__scrollbar=Scrollbar(s.__paaIkkunaOikea, command=s.__paaIkkunaKoodi.yview)
         s.__scrollbar.grid(row=1, column=5, rowspan=2, sticky='ns')
         s.__paaIkkunaKoodi['yscrollcommand'] = s.__scrollbar.set
+        s.__paaIkkunaOikeaYhdista=Button(s.__paaIkkunaOikea, text="Yhdista", command=lambda: s.Connect(), width=9)
+        s.__paaIkkunaOikeaYhdista.grid(row=4, column=0)
         s.__paaIkkunaOikeaSuorita=Button(s.__paaIkkunaOikea, text="Suorita", command=lambda: NAO.suoritaToiminto(koodi=s.__paaIkkunaKoodi.get("0.0", END)))      #Suorittaa koodin robotilla
         s.__paaIkkunaOikeaSuorita.grid(row=4, column=2, sticky=E)     
         s.__paaIkkunaOikeaLaheta=Button(s.__paaIkkunaOikea, text="Laheta")        #Lähettää koodin robotin muistiin
@@ -82,54 +84,85 @@ class Gui():
         """
         s.__alapalkki=Frame(s.__root, bd=1, relief=RAISED, background="lightgrey")
         s.__alapalkki.grid(row=10, columnspan=10, sticky=E+W, padx=1)
-        s.__alapalkkiYhdistetty=Label(s.__alapalkki, text="", width=2, background="lightgrey", anchor=W)
+        s.__alapalkkiYhdistetty=Label(s.__alapalkki, text="(D)", fg="black", width=2, background="lightgrey", anchor=W)
         s.__alapalkkiYhdistetty.grid(row=0, column=0)
-        s.__alapalkkiRobotti=Label(s.__alapalkki, text="", background="lightgrey", width=15, anchor=E)
+        s.__alapalkkiRobotti=Label(s.__alapalkki, text=NAO.RobottiNimi, background="lightgrey", width=15, anchor=E)
         s.__alapalkkiRobotti.grid(row=0, column=1, sticky=E)
-        s.__alapalkkiRobottiIP=Label(s.__alapalkki, text="", background="lightgrey", width=10, anchor=CENTER)
+        s.__alapalkkiRobottiIP=Label(s.__alapalkki, text=NAO.RobottiIP, background="lightgrey", width=10, anchor=CENTER)
         s.__alapalkkiRobottiIP.grid(row=0, column=2, sticky=W)
-        s.__alapalkkiRobottiPort=Label(s.__alapalkki, text="", background="lightgrey", width=5, anchor=W)
+        s.__alapalkkiRobottiPort=Label(s.__alapalkki, text=NAO.RobottiPort, background="lightgrey", width=5, anchor=W)
         s.__alapalkkiRobottiPort.grid(row=0, column=3, sticky=W)
         s.__alapalkkiKello=Label(s.__alapalkki, text="", background="Lightgrey", width=85, anchor=E)
         s.__alapalkkiKello.grid(row=0, column=5, columnspan=10)
 
         s.__root.config(menu=s.__valikkoPalkki)
         s.Kello()
-        s.Yhdistetty()
         s.__root.mainloop()
-        """
-        Varmistetaan ohjelman sammuminen
-        """
+        #Varmistetaan että ohjelma ja sen aliohjelmat sammuu.
         try:
             s.__root.destroy()
         except:
             sys.exit()
             pass
 
-    def Kello(s):       #Ohjelman kello, lyhyt funktio näyttämään aikaa, päivää ja päivämäärää
-        now = time.strftime("%H:%M:%S\t%A %d/%m/%Y ")
-        s.__alapalkkiKello.configure(text=now)
-        s.__root.after(1000, s.Kello)
-        return now
-    def Yhdistetty(s):  #Ohjelman yhdistetty 
-        X = NAO.testNaoYhteys()
+    def Kello(s):
+        """
+        Lyhyt funktio näyttämään aikaa, päivää ja päivämäärää 
+        """
+        now = time.strftime("%H:%M:%S\t%A %d/%m/%Y ")   #muuttuja now saa ajan
+        s.__alapalkkiKello.configure(text=now)          #muuttaa alapalkin kellon tekstin now muuttujan mukaan
+        s.__root.after(1000, s.Kello)                   #suorittaa funktion uudelleen 1s/1000ms jälkeen
+
+    def Yhdistetty(s):  #Ohjelman yhdistetty, muokkaa alapalkin yhteyden tilaa osoittavia osia
+        global YhdistaTehtava
+        s.__paaIkkunaOikeaYhdista.config(text="Disconnect")
+        NAO.testNaoYhteys()                                            #kutsuu NAO moduulista testNaoYhteys ja palautuksen mukaan muuttaa ulkoasun objekteja
+        YhdistaTehtava=s.__root.after(10000, s.Yhdistetty)             #suorittaa funktion uudelleen 10s/10000ms jälkeen
         if X == "Y":
             s.__alapalkkiYhdistetty.configure(text="(Y)", fg="green")
             s.__paaIkkunaOikeaSuorita.configure(state=NORMAL)
-            s.__paaIkkunaOikeaLaheta.configure(state=NORMAL)
-            s.__root.after(10000, s.Yhdistetty)
+            s.__paaIkkunaOikeaLaheta.configure(state=NORMAL)           
         elif X == "N":
             s.__alapalkkiYhdistetty.configure(text="(N)", fg="red")
             s.__paaIkkunaOikeaSuorita.configure(state=DISABLED)
             s.__paaIkkunaOikeaLaheta.configure(state=DISABLED)
-            s.__root.after(10000, s.Yhdistetty)
         else:
             s.__alapalkkiYhdistetty.configure(text="(C)", fg="yellow")
             s.__paaIkkunaOikeaSuorita.configure(state=DISABLED)
             s.__paaIkkunaOikeaLaheta.configure(state=DISABLED)
-            s.__root.after(10000, s.Yhdistetty)
 
-    def PaivitaOrja(s):
+    def Connect(s):
+        if s.__yhdistetty == 0:
+            s.__yhdistetty = 1
+            s.__alapalkkiYhdistetty.configure(text="(C)", fg="yellow")
+            s.Yhdistetty()
+        else:
+            s.__yhdistetty = 0
+            s.__paaIkkunaOikeaYhdista.config(text="Connect")
+            s.__alapalkkiYhdistetty.configure(text="(D)", fg="black")
+            s.__root.after_cancel(YhdistaTehtava)
+
+    def Muokkaa(s):
+        """
+        Muokkaa funktio joka muokkaa pääikkunan objekteja sen mukaan onko muokkaustila päällä vai poissa.
+        """
+        if s.__muokkaustila == 0:
+            s.__paaIkkunaOrjaKuvaus.config(state=NORMAL, bg="white")
+            s.__paaIkkunaKoodi.config(state=NORMAL, bg="white")
+            s.__paaikkunaOikeaTallenna.config(state=NORMAL)
+            s.__paaIkkunaOikeaMuokkaa.configure(text="Pois")
+            s.__muokkaustila = 1
+        else:
+            s.__paaIkkunaOrjaKuvaus.config(state=DISABLED, bg="grey95")
+            s.__paaIkkunaKoodi.config(state=DISABLED, bg="grey95")
+            s.__paaikkunaOikeaTallenna.config(state=DISABLED)
+            s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
+            s.__muokkaustila = 0 #MUOKKAUSTILAN koodi
+
+    def PaivitaOrja(s): 
+        """
+        PäivitäOrja funktio joka tyhjentää listboxin sisällön ja tuo sen uudelleen
+        """
         s.__paaIkkunaLista.delete(0, END)
         SQL.tietokantaToimintoTiedot.clear()
         SQL.tietokantaLaajuus.clear()
@@ -140,6 +173,10 @@ class Gui():
         pass
 
     def ListboxValinta(s, event):
+        """
+        Listbox funktio joka kutsuttaessa valitsee listan objektin ja hakee sen mukaan
+        SQL tietokannasta toiminnon kuvauksen ja koodin, sekä asettaa ne omille paikoilleen. 
+        """
         try:
             widget = event.widget
             selection=widget.curselection()
@@ -162,6 +199,11 @@ class Gui():
             pass
 
     def UusiToiminto(s):
+        """
+        UusiToiminto funktio joka avaa uuden ikkunan, johon käyttäjä syöttää tiedot.
+        Tallenna painikkeella tiedot kerätään kentistä ja lähetetään UusiToimintoSQL funktiolle.
+        Peruuta painike sulkee ohjelman
+        """
         s.__uusiToimintoIkkuna=Toplevel()
         s.__uusiToimintoIkkuna.attributes("-topmost", True)
         s.__uusiToimintoIkkuna.title("Lisää uusi toiminto")
@@ -186,11 +228,19 @@ class Gui():
         s.__toiminnonPeruutaPainike=Button(s.__uusiToimintoIkkuna, text="Peruuta", command=lambda: s.__uusiToimintoIkkuna.destroy())
         s.__toiminnonPeruutaPainike.grid(row=5, column=2, sticky=W, padx=2)
     def UusiToimintoSQL(s, toiminto, kuvaus, koodi):
+        """
+        Siirtää saamansa tiedot SQL moduulille käsiteltäväksi ja tallennettavaksi tietokantaan.
+        kutsuu PäivitäOrja funktion ja sulkee UusiToiminto ikkunan
+        """
         SQL.uusiToiminto(toiminto,kuvaus,koodi)
         s.PaivitaOrja()
         s.__uusiToimintoIkkuna.destroy()
         
     def PoistaToiminto(s):
+        """
+        PoistaToiminto funktio joka ottaa aktiivisen listbox objektin ja siirtää tiedon SQL moduulille käsiteltäväksi
+        Tyhjentää kuvaus ja koodi ruudun
+        """
         toiminto=s.__paaIkkunaLista.get(s.__paaIkkunaLista.curselection())
         s.__paaIkkunaKoodi.delete('1.0', END)
         s.__paaIkkunaOrjaKuvaus.delete('1.0', END)
@@ -198,6 +248,10 @@ class Gui():
         s.PaivitaOrja()
 
     def TallennaMuokattuKoodi(s):
+        """
+        TallennaMuokattuKoodi funktio joka kerää aktiivisen listbox objektin, koodin, kuvauksen ja siirtää tiedon 
+        SQL moduulille käsiteltäväksi.
+        """
         toiminto=s.__paaIkkunaLista.get(s.__paaIkkunaLista.curselection())
         kuvaus=s.__paaIkkunaOrjaKuvaus.get("0.0", END)
         koodi=s.__paaIkkunaKoodi.get("0.0", END)
@@ -209,22 +263,13 @@ class Gui():
         s.__paaikkunaOikeaTallenna.config(state=DISABLED)
         s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
         s.__muokkaustila = 0
-
-    def Muokkaa(s):
-        if s.__muokkaustila == 0:
-            s.__paaIkkunaOrjaKuvaus.config(state=NORMAL, bg="white")
-            s.__paaIkkunaKoodi.config(state=NORMAL, bg="white")
-            s.__paaikkunaOikeaTallenna.config(state=NORMAL)
-            s.__paaIkkunaOikeaMuokkaa.configure(text="Pois")
-            s.__muokkaustila = 1
-        else:
-            s.__paaIkkunaOrjaKuvaus.config(state=DISABLED, bg="grey95")
-            s.__paaIkkunaKoodi.config(state=DISABLED, bg="grey95")
-            s.__paaikkunaOikeaTallenna.config(state=DISABLED)
-            s.__paaIkkunaOikeaMuokkaa.configure(text="Päälle")
-            s.__muokkaustila = 0 #MUOKKAUSTILAN koodi
     
     def lisaaNao(s):
+        """
+        lisaaNao funktio joka avaa uuden ikkunan, johon käyttäjä syöttää tiedot.
+        Tallenna painikkeella tiedot kerätään kentistä ja lähetetään UusiToimintoSQL funktiolle.
+        Peruuta painike sulkee ohjelman
+        """
         s.__LisaaNaoIkkuna=Toplevel()
         s.__LisaaNaoIkkuna.attributes("-topmost", True)
         s.__LisaaNaoIkkuna.title("Lisää robotti")
@@ -251,11 +296,22 @@ class Gui():
         s.__toiminnonPeruutaPainike=Button(s.__LisaaNaoIkkuna, text="Peruuta", command=lambda: s.__LisaaNaoIkkuna.destroy())
         s.__toiminnonPeruutaPainike.grid(row=6, column=2, sticky=W, padx=2)
     def tallennaNao(s, nimi, kuvaus, ip, portti):
+        """
+        Siirtää saamansa tiedot SQL moduulille käsiteltäväksi ja tallennettavaksi tietokantaan.
+        kutsuu PäivitäNao funktion ja sulkee LisaaNao ikkunan
+        """
         SQL.tallennaRobotti(nimi, kuvaus, ip, portti)
         s.__LisaaNaoIkkuna.destroy()
         s.PaivitaNao()
 
     def valitseNao(s):
+        """
+        ValitseNao funktio joka avaa uuden ikkunan, jossa käyttäjä voi valita listalta ennakkoon tallennetun tiedon.
+        Tallenna painikkeella tiedot kerätään kentistä ja lähetetään UusiToimintoSQL funktiolle.
+        Valitse painikkeella tiedot kerätään kentistä ja lähetetään ValitseNaoListalta funktiolle.
+        Poista painike kutsuu PoistaNao funktion
+        Peruuta painike sulkee ohjelman
+        """
         s.__ValitseNaoIkkuna=Toplevel()
         s.__ValitseNaoIkkuna.attributes("-topmost", True)
         s.__ValitseNaoIkkuna.title("Valitse robotti")
@@ -297,10 +353,18 @@ class Gui():
         s.__ValitseNaoPeruutaPainike.grid(row=6, column=4, sticky=W+E, padx=2)
         s.PaivitaNao()
     def PoistaNao(s):
+        """
+        PoistaNao funktio joka valitsee aktiivisen objektin siirtää saamansa tiedon SQL moduulille käsiteltäväksi
+        """
         value=s.__valitseNaoNimiEnt.get()
         SQL.poistaRobotti(value)
         s.PaivitaNao()
+
     def PaivitaNao(s):
+        """
+        PäivitäNao funktio joka tyhjentää ValitseNao ruudun kaikki tiedot ja tuo sen hetkiset tiedot palvelimelta,
+        sekä asettaa saamansa tiedot paikoilleen ValitseNao ruutuun
+        """
         try:
             s.__valitseNaoNimiEnt.config(state=NORMAL)
             s.__valitseNaoKuvausEnt.config(state=NORMAL)
@@ -331,30 +395,38 @@ class Gui():
             s.__ValitseNaoTallennaPainike.config(state=DISABLED)
         except TclError:
             pass
+
     def NaoListboxValinta(s, event):
-            widget = event.widget
-            selection=widget.curselection()
-            value = widget.get(selection)
-            try:
-                s.__valitseNaoNimiEnt.config(state=NORMAL)
-                s.__valitseNaoKuvausEnt.config(state=NORMAL)
-                s.__valitseNaoKuvausEnt.config(bg="White")
-                s.__valitseNaoIpEnt.config(state=NORMAL)
-                s.__valitseNaoPortEnt.config(state=NORMAL)
-                s.__ValitseNaoValitsePainike.config(state=NORMAL)
-                s.__ValitseNaoTallennaPainike.config(state=NORMAL)
-            except TclError:
-                pass
-            s.__valitseNaoNimiEnt.delete(0, END)
-            s.__valitseNaoNimiEnt.insert(0, value)
-            s.__valitseNaoKuvausEnt.delete('1.0', END)
-            s.__valitseNaoKuvausEnt.insert('1.0', SQL.tuoRobottiKuvaus(value[-1]))
-            s.__valitseNaoIpEnt.delete(0, END)
-            s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value[-1]))
-            s.__valitseNaoPortEnt.delete(0, END)
-            s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
+        """
+        Listbox funktio joka kutsuttaessa valitsee listan objektin ja hakee sen mukaan
+        SQL tietokannasta toiminnon kuvauksen ja koodin, sekä asettaa ne omille paikoilleen. 
+        """
+        widget = event.widget
+        selection=widget.curselection()
+        value = widget.get(selection)
+        try:
+            s.__valitseNaoNimiEnt.config(state=NORMAL)
+            s.__valitseNaoKuvausEnt.config(state=NORMAL)
+            s.__valitseNaoKuvausEnt.config(bg="White")
+            s.__valitseNaoIpEnt.config(state=NORMAL)
+            s.__valitseNaoPortEnt.config(state=NORMAL)
+            s.__ValitseNaoValitsePainike.config(state=NORMAL)
+            s.__ValitseNaoTallennaPainike.config(state=NORMAL)
+        except TclError:
+            pass
+        s.__valitseNaoNimiEnt.delete(0, END)
+        s.__valitseNaoNimiEnt.insert(0, value)
+        s.__valitseNaoKuvausEnt.delete('1.0', END)
+        s.__valitseNaoKuvausEnt.insert('1.0', SQL.tuoRobottiKuvaus(value[-1]))
+        s.__valitseNaoIpEnt.delete(0, END)
+        s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value[-1]))
+        s.__valitseNaoPortEnt.delete(0, END)
+        s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
 
     def ValitseNaoListalta(s, nimi, ip, portti):
+        """
+        Saa tiedot valitseNao funktiolta ja tietojen perusteella configuroi pääikkunan objekteja.
+        """
         s.__alapalkkiYhdistetty.configure(text="(C)", fg="yellow")
         NAO.RobottiNimi=nimi
         NAO.RobottiIP=ip
@@ -362,9 +434,14 @@ class Gui():
         s.__alapalkkiRobotti.config(text=NAO.RobottiNimi)
         s.__alapalkkiRobottiIP.config(text=NAO.RobottiIP)
         s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
+        s.Yhdistetty()
+        NAO.tallennaRobotti()
         s.__ValitseNaoIkkuna.destroy()
 
     def Yhdista(s):
+        """
+        Yhdistä funktio avaa uuden ikkunan jossa käyttäjä saa yhdistettyä ohjelman palvelimeen, palvelimen tiedot 
+        """
         s.__YhdistaIkkuna=Toplevel()
         s.__YhdistaIkkuna.attributes("-topmost", True)
         s.__YhdistaIkkuna.title("Yhdistä")
@@ -424,14 +501,23 @@ class Gui():
         SQL.tallennaPalvelin()
         SQL.testaaPalvelin()
         s.__YhdistaIkkuna.destroy()
-        pass
-
-
-
+ 
+def ViimeisinRobotti():
+    try:
+        robotti=open("RobottiAsetukset.txt", "r")
+        rivit=robotti.readlines()
+        NAO.RobottiNimi = rivit[0][:-1]
+        NAO.RobottiIP = rivit[1][:-1]
+        NAO.RobottiPort = int(rivit[2][:-1])
+        robotti.close()
+    except:
+        print("VIRHE TUO VIIMEISIN ROBOTTI")
 
 def main():
-    SQL.tuoPalvelin()
     SQL.tuoTietokanta()
     SQL.tuoRobotit()
+    SQL.tuoViimeisinPalvelin()
+    ViimeisinRobotti()
+
     Gui()
 main()

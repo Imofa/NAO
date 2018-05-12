@@ -1,12 +1,21 @@
-robotIp = "127.0.0.1"
-robotPort = 54924
-
 # -*- encoding: UTF-8 -*- 
 
-''' Whole Body Motion: Foot State '''
+'''Cartesian control: Multiple Effector Trajectories'''
+
+#########################################################
+#   	Älä muokkaa jos et tiedä mitä teet						#
+#		Tai et ole varma mitä teet					#
+#########################################################
+robotinTiedot = open("robottiAsetukset.txt", "r")							#
+rivit=robotinTiedot.readlines()							#
+robotIP = rivit[1][:-1]							#
+robotPort = int(rivit[2])							#
+robotinTiedot.close()							#
+#########################################################
 
 import sys
-import math
+import motion
+import almath
 from naoqi import ALProxy
 
 
@@ -19,14 +28,13 @@ def StiffnessOn(proxy):
 
 
 def main(robotIP):
-    ''' Example of a whole body FootState
+    ''' Move the torso and keep arms fixed in nao space
     Warning: Needs a PoseInit before executing
-             Whole body balancer must be inactivated at the end of the script
     '''
 
     # Init proxies.
     try:
-        proxy = ALProxy("ALMotion", robotIP, robotPort)
+        motionProxy = ALProxy("ALMotion", robotIP, robotPort)
     except Exception, e:
         print "Could not create proxy to ALMotion"
         print "Error was: ", e
@@ -38,45 +46,58 @@ def main(robotIP):
         print "Error was: ", e
 
     # Set NAO in Stiffness On
-    StiffnessOn(proxy)
+    StiffnessOn(motionProxy)
 
     # Send NAO to Pose Init
     postureProxy.goToPosture("StandInit", 0.5)
 
-    # Activate Whole Body Balancer.
-    isEnabled  = True
-    proxy.wbEnable(isEnabled)
+    space      = motion.FRAME_ROBOT
+    isAbsolute = False
 
-    # Legs are constrained in a plane
-    stateName  = "Plane"
-    supportLeg = "Legs"
-    proxy.wbFootState(stateName, supportLeg)
+    effectorList = ["LArm", "RArm"]
 
-    # HipYawPitch angleInterpolation
-    # Without Whole Body balancer, foot will not be keeped plane.
-    names      = "LHipYawPitch"
-    angleLists = [-45.0, 10.0, 0.0]
-    timeLists  = [3.0, 6.0, 9.0]
-    isAbsolute = True
-    angleLists = [angle*math.pi/180.0 for angle in angleLists]
-    proxy.angleInterpolation(names, angleLists, timeLists, isAbsolute)
+    # Motion of Arms with block process
+    axisMaskList = [almath.AXIS_MASK_VEL, almath.AXIS_MASK_VEL]
 
-    # Deactivate Whole Body Balancer.
-    isEnabled  = False
-    proxy.wbEnable(isEnabled)
+    timesList    = [[1.0], [1.0]]         # seconds
+    pathList     = [[[0.0, -0.04, 0.0, 0.0, 0.0, 0.0]],
+                    [[0.0,  0.04, 0.0, 0.0, 0.0, 0.0]]]
+    motionProxy.positionInterpolations(effectorList, space, pathList,
+                                       axisMaskList, timesList, isAbsolute)
 
+
+    effectorList = ["LArm", "RArm", "Torso"]
+
+    # Motion of Arms and Torso with block process
+    axisMaskList = [almath.AXIS_MASK_VEL,
+                    almath.AXIS_MASK_VEL,
+                    almath.AXIS_MASK_ALL]
+
+    timesList    = [[4.0],                  # LArm  in seconds
+                    [4.0],                  # RArm  in seconds
+                    [1.0, 2.0, 3.0, 4.0]]   # Torso in seconds
+
+    dx           = 0.03                  # translation axis X (meters)
+    dy           = 0.04                  # translation axis Y (meters)
+
+    pathList     = [[[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]], # LArm do not move
+                    [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]], # RArm do not move
+                    [[0.0, +dy, 0.0, 0.0, 0.0, 0.0],  # Torso point 1
+                     [-dx, 0.0, 0.0, 0.0, 0.0, 0.0],  # Torso point 2
+                     [0.0, -dy, 0.0, 0.0, 0.0, 0.0],  # Torso point 3
+                     [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]  # Torso point 4
+                    ]
+    motionProxy.positionInterpolations(effectorList, space, pathList,
+                                       axisMaskList, timesList, isAbsolute)
 
 
 if __name__ == "__main__":
 
     if len(sys.argv) <= 1:
-        print "Usage python motion_wbFootState.py robotIP (optional default: 127.0.0.1)"
+        print "Usage python motion_cartesianTorsoArm2.py robotIP (optional default: 127.0.0.1)"
     else:
-        robotIp = sys.argv[1]
+        robotIP = sys.argv[1]
 
-    main(robotIp)
-
-
-
+    main(robotIP)
 
 
