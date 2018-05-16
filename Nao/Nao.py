@@ -116,7 +116,7 @@ class Gui():
     def Yhdistetty(s):  #Ohjelman yhdistetty, muokkaa alapalkin yhteyden tilaa osoittavia osia
         global YhdistaTehtava
         s.__paaIkkunaOikeaYhdista.config(text="Disconnect")
-        NAO.testNaoYhteys()                                            #kutsuu NAO moduulista testNaoYhteys ja palautuksen mukaan muuttaa ulkoasun objekteja
+        X=NAO.testNaoYhteys()                                            #kutsuu NAO moduulista testNaoYhteys ja palautuksen mukaan muuttaa ulkoasun objekteja
         YhdistaTehtava=s.__root.after(10000, s.Yhdistetty)             #suorittaa funktion uudelleen 10s/10000ms jälkeen
         if X == "Y":
             s.__alapalkkiYhdistetty.configure(text="(Y)", fg="green")
@@ -434,7 +434,10 @@ class Gui():
         s.__alapalkkiRobotti.config(text=NAO.RobottiNimi)
         s.__alapalkkiRobottiIP.config(text=NAO.RobottiIP)
         s.__alapalkkiRobottiPort.config(text=NAO.RobottiPort)
-        s.Yhdistetty()
+        if s.__yhdistetty == 0:
+            s.Connect()
+        else:
+            s.Yhdistetty()
         NAO.tallennaRobotti()
         s.__ValitseNaoIkkuna.destroy()
 
