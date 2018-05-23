@@ -190,7 +190,7 @@ def tuoRobotti(index):
     try:
         cursor.execute(sql)
         nimi = cursor.fetchone()
-        nimi = nimi
+        nimi = nimi[-1]
         robottiTiedot.append(nimi)
     except:
         yhteys.rollback()
@@ -211,6 +211,7 @@ def tallennaRobotti(nimi, kuvaus, ip, portti):
         messagebox.showerror("VIRHE","Tarkista nimi, ip ja portti")
 
 def tuoRobottiKuvaus(value):
+    print(value)
     sql = ("SELECT kuvaus FROM nao_robotti WHERE nimi = '{0}'").format(value)
     try:
         cursor.execute(sql)
@@ -218,7 +219,8 @@ def tuoRobottiKuvaus(value):
         kuvaus = kuvaus[-1]
         kuvaus = str.replace(kuvaus, "HEITTOMERKKI", "'")
         return kuvaus
-    except:
+    except Exception as e:
+        print(e)
         yhteys.rollback()
         messagebox.showerror("YHTEYS VIRHE", "YHTEYSVIRHE\nkoodi:tuoRobottiKuvaus")
 

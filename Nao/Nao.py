@@ -417,11 +417,11 @@ class Gui():
         s.__valitseNaoNimiEnt.delete(0, END)
         s.__valitseNaoNimiEnt.insert(0, value)
         s.__valitseNaoKuvausEnt.delete('1.0', END)
-        s.__valitseNaoKuvausEnt.insert('1.0', SQL.tuoRobottiKuvaus(value[-1]))
+        s.__valitseNaoKuvausEnt.insert('1.0', SQL.tuoRobottiKuvaus(value))
         s.__valitseNaoIpEnt.delete(0, END)
-        s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value[-1]))
+        s.__valitseNaoIpEnt.insert(0, SQL.tuoRobottiIp(value))
         s.__valitseNaoPortEnt.delete(0, END)
-        s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value[-1]))
+        s.__valitseNaoPortEnt.insert(0, SQL.tuoRobottiPortti(value))
 
     def ValitseNaoListalta(s, nimi, ip, portti):
         """
